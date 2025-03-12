@@ -7,3 +7,15 @@ func WithHTTPClient(httpClient HTTPClient) ClientOption {
 		client.httpClient = httpClient
 	}
 }
+
+func WithCredentials(credentials Credentials) ClientOption {
+	return func(client *Client) {
+		client.credentials = credentials
+	}
+}
+
+func WithAccessTokens(tokens AccessTokens) ClientOption {
+	return func(client *Client) {
+		client.tokens = tokens
+	}
+}
