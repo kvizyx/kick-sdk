@@ -1,6 +1,11 @@
 package kickkit
 
-import "context"
+import (
+	"context"
+	optionalvalues "github.com/glichtv/kick-kit/internal/optional-values"
+	"net/http"
+	"strconv"
+)
 
 type (
 	Channel struct {
@@ -29,17 +34,62 @@ type Channels struct {
 }
 
 func (c *Client) Channels() Channels {
-	return Channels{
-		client: c,
+	return Channels{client: c}
+}
+
+type GetChannelsInput struct {
+	BroadcasterUserIDs []int
+}
+
+// ByBroadcasterID retrieves Channel information based on provided broadcaster IDs.
+//
+// Reference: https://docs.kick.com/apis/channels#channels
+func (c Channels) ByBroadcasterID(ctx context.Context, input GetChannelsInput) (Response[[]Channel], error) {
+	const resource = "public/v1/channels"
+
+	broadcasterIDs := make([]string, len(input.BroadcasterUserIDs))
+
+	for index, broadcasterID := range input.BroadcasterUserIDs {
+		broadcasterIDs[index] = strconv.Itoa(broadcasterID)
 	}
+
+	apiRequest := newAPIRequest[[]Channel](
+		ctx,
+		c.client,
+		requestOptions{
+			resource: resource,
+			method:   http.MethodGet,
+			authType: AuthTypeUserToken,
+			urlValues: optionalvalues.Values{
+				"broadcaster_user_id": optionalvalues.Many(broadcasterIDs),
+			},
+		},
+	)
+
+	return apiRequest.execute()
 }
 
-func (c Channels) ByBroadcasterID(ctx context.Context) error {
-	const resource = "channels"
-	return nil
+type UpdateStreamInput struct {
+	CategoryID  int    `json:"category_id,omitempty"`
+	StreamTitle string `json:"stream_title,omitempty"`
 }
 
-func (c Channels) UpdateStream(ctx context.Context) error {
-	const resource = "channels"
-	return nil
+// UpdateStream updates Stream metadata for a Channel based on the channel ID.
+//
+// Reference: https://docs.kick.com/apis/channels#channels-1
+func (c Channels) UpdateStream(ctx context.Context, input UpdateStreamInput) (Response[EmptyResponse], error) {
+	const resource = "public/v1/channels"
+
+	apiRequest := newAPIRequest[EmptyResponse](
+		ctx,
+		c.client,
+		requestOptions{
+			resource: resource,
+			method:   http.MethodPatch,
+			authType: AuthTypeUserToken,
+			body:     input,
+		},
+	)
+
+	return apiRequest.execute()
 }

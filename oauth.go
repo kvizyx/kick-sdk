@@ -14,7 +14,7 @@ const (
 type AuthorizationType int
 
 const (
-	AuthUserAccessToken AuthorizationType = iota + 1
+	AuthTypeUserToken AuthorizationType = iota + 1
 )
 
 type (

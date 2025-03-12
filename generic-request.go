@@ -26,11 +26,11 @@ type (
 	}
 
 	requestOptions struct {
-		resource      string
-		method        string
-		authorization AuthorizationType
-		urlValues     optionalvalues.Values
-		body          any
+		resource  string
+		method    string
+		authType  AuthorizationType
+		urlValues optionalvalues.Values
+		body      any
 	}
 )
 
@@ -71,8 +71,8 @@ func (r request[Output]) execute() (Response[Output], error) {
 		return Response[Output]{}, fmt.Errorf("new request with context: %w", err)
 	}
 
-	switch r.options.authorization {
-	case AuthUserAccessToken:
+	switch r.options.authType {
+	case AuthTypeUserToken:
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", r.client.tokens.UserAccessToken))
 	}
 

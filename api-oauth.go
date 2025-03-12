@@ -20,9 +20,7 @@ type OAuth struct {
 }
 
 func (c *Client) OAuth() OAuth {
-	return OAuth{
-		client: c,
-	}
+	return OAuth{client: c}
 }
 
 type AuthorizationURLInput struct {
@@ -32,6 +30,10 @@ type AuthorizationURLInput struct {
 	CodeChallenge string
 }
 
+// AuthorizationURL returns URL to the authorization page where they can log in and approve the application's
+// access request.
+//
+// Reference: https://docs.kick.com/getting-started/generating-tokens-oauth2-flow#authorization-endpoint
 func (o OAuth) AuthorizationURL(input AuthorizationURLInput) string {
 	const resource = "oauth/authorize"
 
@@ -60,13 +62,17 @@ type ExchangeCodeInput struct {
 	CodeVerifier string
 }
 
+// ExchangeCode exchanges the code for a valid AccessToken's that can be used to make authorized
+// requests to the Kick API.
+//
+// Reference: https://docs.kick.com/getting-started/generating-tokens-oauth2-flow#token-endpoint
 func (o OAuth) ExchangeCode(ctx context.Context, input ExchangeCodeInput) (Response[AccessToken], error) {
 	const resource = "oauth/token"
 
-	request := NewAuthRequest[AccessToken](ctx, o.client, RequestOptions{
-		Resource: resource,
-		Method:   http.MethodPost,
-		Body: optionalvalues.Values{
+	authRequest := newAuthRequest[AccessToken](ctx, o.client, requestOptions{
+		resource: resource,
+		method:   http.MethodPost,
+		body: optionalvalues.Values{
 			"code":          optionalvalues.Single(input.Code),
 			"client_id":     optionalvalues.Single(o.client.credentials.ClientID),
 			"client_secret": optionalvalues.Single(o.client.credentials.ClientSecret),
@@ -76,7 +82,7 @@ func (o OAuth) ExchangeCode(ctx context.Context, input ExchangeCodeInput) (Respo
 		},
 	})
 
-	return request.Execute()
+	return authRequest.execute()
 }
 
 type RefreshTokenInput struct {
@@ -84,13 +90,16 @@ type RefreshTokenInput struct {
 	GrantType    string
 }
 
+// RefreshToken refreshes both access and refresh tokens.
+//
+// Reference: https://docs.kick.com/getting-started/generating-tokens-oauth2-flow#refresh-token-endpoint
 func (o OAuth) RefreshToken(ctx context.Context, input RefreshTokenInput) (Response[AccessToken], error) {
 	const resource = "oauth/token"
 
-	request := NewAuthRequest[AccessToken](ctx, o.client, RequestOptions{
-		Resource: resource,
-		Method:   http.MethodPost,
-		Body: optionalvalues.Values{
+	authRequest := newAuthRequest[AccessToken](ctx, o.client, requestOptions{
+		resource: resource,
+		method:   http.MethodPost,
+		body: optionalvalues.Values{
 			"refresh_token": optionalvalues.Single(input.RefreshToken),
 			"client_id":     optionalvalues.Single(o.client.credentials.ClientID),
 			"client_secret": optionalvalues.Single(o.client.credentials.ClientSecret),
@@ -98,7 +107,7 @@ func (o OAuth) RefreshToken(ctx context.Context, input RefreshTokenInput) (Respo
 		},
 	})
 
-	return request.Execute()
+	return authRequest.execute()
 }
 
 type RevokeTokenInput struct {
@@ -106,17 +115,20 @@ type RevokeTokenInput struct {
 	TokenHintType string
 }
 
+// RevokeToken revokes access to the token.
+//
+// Reference: https://docs.kick.com/getting-started/generating-tokens-oauth2-flow#revoke-token-endpoint
 func (o OAuth) RevokeToken(ctx context.Context, input RevokeTokenInput) (Response[EmptyResponse], error) {
 	const resource = "oauth/revoke"
 
-	request := NewAuthRequest[EmptyResponse](ctx, o.client, RequestOptions{
-		Resource: resource,
-		Method:   http.MethodPost,
-		Body: optionalvalues.Values{
+	authRequest := newAuthRequest[EmptyResponse](ctx, o.client, requestOptions{
+		resource: resource,
+		method:   http.MethodPost,
+		body: optionalvalues.Values{
 			"token":           optionalvalues.Single(input.Token),
 			"token_hint_type": optionalvalues.Single(input.TokenHintType),
 		},
 	})
 
-	return request.Execute()
+	return authRequest.execute()
 }
