@@ -3,23 +3,26 @@ package kickkit
 import "net/http"
 
 type (
-	EmptyResponse struct{}
-	ErrorResponse struct {
+	apiResponse[Data any] struct {
+		Data    Data   `json:"data,omitempty"`
+		Message string `json:"message,omitempty"`
+	}
+
+	errorResponse struct {
 		Error            string `json:"error"`
 		ErrorDescription string `json:"error_description"`
 	}
 )
+
+// EmptyResponse is a response that is used as a stub in case endpoint is not returning
+// any data in response body.
+type EmptyResponse struct{}
 
 // Response is a response that will be returned to the user as a result of a call to any
 // Kick API endpoint.
 type Response[Data any] struct {
 	Data             Data
 	ResponseMetadata ResponseMetadata
-}
-
-type APIResponse[Data any] struct {
-	Data    Data   `json:"data,omitempty"`
-	Message string `json:"message,omitempty"`
 }
 
 // ResponseMetadata is a metadata of the Kick API response.

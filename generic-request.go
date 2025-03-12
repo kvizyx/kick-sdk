@@ -5,63 +5,95 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	urlext "github.com/glichtv/kick-kit/internal/optional-values"
+	optionalvalues "github.com/glichtv/kick-kit/internal/optional-values"
 	"io"
 	"net/http"
-	"net/url"
 )
 
-type RequestTarget int
+type requestTarget int
 
 const (
-	RequestTargetAPI RequestTarget = iota
-	RequestTargetAuth
+	requestTargetAPI requestTarget = iota
+	requestTargetAuth
 )
 
 type (
-	Request[Output any] struct {
+	request[Output any] struct {
 		ctx     context.Context
 		client  *Client
-		target  RequestTarget
-		options RequestOptions
+		target  requestTarget
+		options requestOptions
 	}
 
-	RequestOptions struct {
-		Resource      string
-		Method        string
-		Authorization AuthorizationType
-		URLValues     url.Values
-		Body          any
+	requestOptions struct {
+		resource      string
+		method        string
+		authorization AuthorizationType
+		urlValues     optionalvalues.Values
+		body          any
 	}
 )
 
-func NewAPIRequest[Output any](ctx context.Context, client *Client, ro RequestOptions) Request[Output] {
-	return Request[Output]{
+func newAPIRequest[Output any](ctx context.Context, client *Client, ro requestOptions) request[Output] {
+	return request[Output]{
 		ctx:     ctx,
 		client:  client,
-		target:  RequestTargetAPI,
+		target:  requestTargetAPI,
 		options: ro,
 	}
 }
 
-func NewAuthRequest[Output any](ctx context.Context, client *Client, ro RequestOptions) Request[Output] {
-	return Request[Output]{
+func newAuthRequest[Output any](ctx context.Context, client *Client, ro requestOptions) request[Output] {
+	return request[Output]{
 		ctx:     ctx,
 		client:  client,
-		target:  RequestTargetAuth,
+		target:  requestTargetAuth,
 		options: ro,
 	}
 }
 
-func (r Request[Output]) Execute() (Response[Output], error) {
-	response, err := r.execute()
+func (r request[Output]) execute() (Response[Output], error) {
+	var endpointURL string
+
+	switch r.target {
+	case requestTargetAPI:
+		endpointURL = APIBaseURL.WithResource(r.options.resource)
+	case requestTargetAuth:
+		endpointURL = AuthBaseURL.WithResource(r.options.resource)
+	}
+
+	if r.options.urlValues != nil {
+		endpointURL = fmt.Sprintf("%s?%s", endpointURL, r.options.urlValues.Encode())
+	}
+
+	req, err := http.NewRequestWithContext(r.ctx, r.options.method, endpointURL, nil)
 	if err != nil {
-		return Response[Output]{}, err
+		return Response[Output]{}, fmt.Errorf("new request with context: %w", err)
+	}
+
+	switch r.options.authorization {
+	case AuthUserAccessToken:
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", r.client.tokens.UserAccessToken))
+	}
+
+	if r.options.body != nil {
+		if err = setRequestBody(req, r.options.body); err != nil {
+			return Response[Output]{}, fmt.Errorf("set request body: %w", err)
+		}
+	}
+
+	response, err := r.client.httpClient.Do(req)
+	if err != nil {
+		return Response[Output]{}, fmt.Errorf("do request: %w", err)
 	}
 	defer func() {
 		_ = response.Body.Close()
 	}()
 
+	return r.parse(response)
+}
+
+func (r request[Output]) parse(response *http.Response) (Response[Output], error) {
 	metadata := ResponseMetadata{
 		StatusCode: response.StatusCode,
 		Header:     response.Header,
@@ -74,10 +106,10 @@ func (r Request[Output]) Execute() (Response[Output], error) {
 	}
 
 	switch r.target {
-	case RequestTargetAPI:
-		var output APIResponse[Output]
+	case requestTargetAPI:
+		var output apiResponse[Output]
 
-		if err = json.NewDecoder(response.Body).Decode(&output); err != nil {
+		if err := json.NewDecoder(response.Body).Decode(&output); err != nil {
 			return Response[Output]{}, fmt.Errorf("decode response body: %w", err)
 		}
 
@@ -87,16 +119,16 @@ func (r Request[Output]) Execute() (Response[Output], error) {
 			Data:             output.Data,
 			ResponseMetadata: metadata,
 		}, nil
-	case RequestTargetAuth:
+	case requestTargetAuth:
 		if response.StatusCode != http.StatusOK {
-			var errorResponse ErrorResponse
+			var errorOutput errorResponse
 
-			if err = json.NewDecoder(response.Body).Decode(&errorResponse); err != nil {
-				return Response[Output]{}, fmt.Errorf("decode response body: %w", err)
+			if err := json.NewDecoder(response.Body).Decode(&errorOutput); err != nil {
+				return Response[Output]{}, fmt.Errorf("decode error response body: %w", err)
 			}
 
-			metadata.KickError = errorResponse.Error
-			metadata.KickErrorDescription = errorResponse.ErrorDescription
+			metadata.KickError = errorOutput.Error
+			metadata.KickErrorDescription = errorOutput.ErrorDescription
 
 			return Response[Output]{
 				ResponseMetadata: metadata,
@@ -105,7 +137,7 @@ func (r Request[Output]) Execute() (Response[Output], error) {
 
 		var output Output
 
-		if err = json.NewDecoder(response.Body).Decode(&output); err != nil {
+		if err := json.NewDecoder(response.Body).Decode(&output); err != nil {
 			return Response[Output]{}, fmt.Errorf("decode response body: %w", err)
 		}
 
@@ -118,47 +150,9 @@ func (r Request[Output]) Execute() (Response[Output], error) {
 	return Response[Output]{}, nil
 }
 
-func (r Request[Output]) execute() (*http.Response, error) {
-	var endpointURL string
-
-	switch r.target {
-	case RequestTargetAPI:
-		endpointURL = APIBaseURL.WithResource(r.options.Resource)
-	case RequestTargetAuth:
-		endpointURL = AuthBaseURL.WithResource(r.options.Resource)
-	}
-
-	if r.options.URLValues != nil {
-		endpointURL = fmt.Sprintf("%s?%s", endpointURL, r.options.URLValues.Encode())
-	}
-
-	request, err := http.NewRequestWithContext(r.ctx, r.options.Method, endpointURL, nil)
-	if err != nil {
-		return nil, fmt.Errorf("new request with context: %w", err)
-	}
-
-	switch r.options.Authorization {
-	case AuthUserAccessToken:
-		request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", r.client.tokens.UserAccessToken))
-	}
-
-	if r.options.Body != nil {
-		if err = setRequestBody(request, r.options.Body); err != nil {
-			return nil, fmt.Errorf("set request body: %w", err)
-		}
-	}
-
-	response, err := r.client.httpClient.Do(request)
-	if err != nil {
-		return nil, fmt.Errorf("do request: %w", err)
-	}
-
-	return response, nil
-}
-
 // setRequestBody defines a body type and sets it to a request with an appropriate content type header.
 func setRequestBody(request *http.Request, body any) error {
-	if urlValues, isForm := body.(urlext.Values); isForm {
+	if urlValues, isForm := body.(optionalvalues.Values); isForm {
 		buffer := bytes.NewBuffer([]byte(urlValues.Encode()))
 
 		request.Body = io.NopCloser(buffer)
