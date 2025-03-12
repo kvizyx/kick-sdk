@@ -139,7 +139,7 @@ func (r Request[Output]) execute() (*http.Response, error) {
 
 	switch r.options.Authorization {
 	case AuthUserAccessToken:
-		request.Header.Set("Authorization", "Bearer"+r.client.tokens.UserAccessToken)
+		request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", r.client.tokens.UserAccessToken))
 	}
 
 	if r.options.Body != nil {
