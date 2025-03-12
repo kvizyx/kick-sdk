@@ -33,7 +33,7 @@ type AuthorizationURLInput struct {
 }
 
 func (o OAuth) AuthorizationURL(input AuthorizationURLInput) string {
-	const resource = "public/v1/oauth/authorize"
+	const resource = "oauth/authorize"
 
 	scopes := make([]string, len(input.Scopes))
 
@@ -61,7 +61,7 @@ type ExchangeCodeInput struct {
 }
 
 func (o OAuth) ExchangeCode(ctx context.Context, input ExchangeCodeInput) (Response[AccessToken], error) {
-	const resource = "public/v1/oauth/token"
+	const resource = "oauth/token"
 
 	request := NewAuthRequest[AccessToken](ctx, o.client, RequestOptions{
 		Resource: resource,
@@ -85,7 +85,7 @@ type RefreshTokenInput struct {
 }
 
 func (o OAuth) RefreshToken(ctx context.Context, input RefreshTokenInput) (Response[AccessToken], error) {
-	const resource = "public/v1/oauth/token"
+	const resource = "oauth/token"
 
 	request := NewAuthRequest[AccessToken](ctx, o.client, RequestOptions{
 		Resource: resource,
@@ -107,7 +107,7 @@ type RevokeTokenInput struct {
 }
 
 func (o OAuth) RevokeToken(ctx context.Context, input RevokeTokenInput) (Response[EmptyResponse], error) {
-	const resource = "public/v1/oauth/revoke"
+	const resource = "oauth/revoke"
 
 	request := NewAuthRequest[EmptyResponse](ctx, o.client, RequestOptions{
 		Resource: resource,
