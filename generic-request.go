@@ -5,9 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/glichtv/kick-sdk/internal/urloptional"
 	"io"
 	"net/http"
+
+	"github.com/glichtv/kick-sdk/internal/urloptional"
 )
 
 type (
@@ -64,8 +65,7 @@ func (r Request[Output]) Build() (*http.Request, error) {
 		return nil, fmt.Errorf("new request with context: %w", err)
 	}
 
-	switch r.options.AuthType {
-	case AuthTypeUserToken:
+	if r.options.AuthType == AuthTypeUserToken {
 		request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", r.client.tokens.UserAccessToken))
 	}
 

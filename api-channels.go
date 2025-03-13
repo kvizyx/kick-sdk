@@ -2,9 +2,10 @@ package kicksdk
 
 import (
 	"context"
-	"github.com/glichtv/kick-sdk/internal/urloptional"
 	"net/http"
 	"strconv"
+
+	"github.com/glichtv/kick-sdk/internal/urloptional"
 )
 
 type (

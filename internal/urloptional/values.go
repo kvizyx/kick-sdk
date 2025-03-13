@@ -1,9 +1,10 @@
 package urloptional
 
 import (
-	"github.com/glichtv/kick-sdk/optional"
 	"net/url"
 	"strings"
+
+	"github.com/glichtv/kick-sdk/optional"
 )
 
 type (

@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/glichtv/kick-sdk/internal/publickey"
 	"io"
 	"net/http"
+
+	"github.com/glichtv/kick-sdk/internal/publickey"
 )
 
 var ErrUnexpectedEventType = errors.New("unexpected event type")

@@ -14,7 +14,7 @@ type EventsTracker interface {
 // MapEventsTracker is a primitive concurrency-safe in-memory implementation of the EventsTracker.
 type MapEventsTracker struct {
 	events       map[string]struct{}
-	eventsLocker sync.RWMutex
+	eventsLocker sync.Mutex
 }
 
 func NewMapEventsTracker() *MapEventsTracker {
@@ -24,6 +24,9 @@ func NewMapEventsTracker() *MapEventsTracker {
 }
 
 func (met *MapEventsTracker) Track(_ context.Context, eventID string) (bool, error) {
+	met.eventsLocker.Lock()
+	defer met.eventsLocker.Unlock()
+
 	_, exist := met.events[eventID]
 	if exist {
 		return true, nil

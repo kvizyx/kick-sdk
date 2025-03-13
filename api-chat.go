@@ -25,7 +25,7 @@ func (c *Client) Chat() Chat {
 
 type (
 	PostChatMessageInput struct {
-		BroadcasterUserId int               `json:"broadcaster_user_id,omitempty"`
+		BroadcasterUserID int               `json:"broadcaster_user_id,omitempty"`
 		Content           string            `json:"content"`
 		PosterType        MessagePosterType `json:"type"`
 	}
@@ -46,7 +46,7 @@ func (c Chat) PostMessage(ctx context.Context, input PostChatMessageInput) (Resp
 	}
 
 	// When sending as a user, the broadcaster user ID is required.
-	if input.PosterType == MessagePosterUser && input.BroadcasterUserId <= 0 {
+	if input.PosterType == MessagePosterUser && input.BroadcasterUserID <= 0 {
 		return Response[PostChatMessageOutput]{}, ErrNoBroadcasterID
 	}
 

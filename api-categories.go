@@ -3,8 +3,9 @@ package kicksdk
 import (
 	"context"
 	"fmt"
-	"github.com/glichtv/kick-sdk/internal/urloptional"
 	"net/http"
+
+	"github.com/glichtv/kick-sdk/internal/urloptional"
 )
 
 type Category struct {

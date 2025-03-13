@@ -2,8 +2,9 @@ package kicksdk
 
 import (
 	"fmt"
-	"github.com/glichtv/kick-sdk/internal/publickey"
 	"net/http"
+
+	"github.com/glichtv/kick-sdk/internal/publickey"
 )
 
 // ExtractWebhookEventHeader extracts all Kick's event-specific headers from the provided Request

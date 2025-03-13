@@ -2,8 +2,9 @@ package kicksdk
 
 import (
 	"context"
-	"github.com/glichtv/kick-sdk/internal/urloptional"
 	"net/http"
+
+	"github.com/glichtv/kick-sdk/internal/urloptional"
 )
 
 type EventSubscription struct {
