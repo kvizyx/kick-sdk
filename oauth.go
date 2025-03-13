@@ -1,4 +1,4 @@
-package kickkit
+package kicksdk
 
 type OAuthScope string
 

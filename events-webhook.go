@@ -1,8 +1,8 @@
-package kickkit
+package kicksdk
 
 import (
 	"fmt"
-	"github.com/glichtv/kick-kit/internal/publickey"
+	"github.com/glichtv/kick-sdk/internal/publickey"
 	"net/http"
 )
 

@@ -1,11 +1,11 @@
-package kickkit
+package kicksdk
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/glichtv/kick-kit/internal/publickey"
+	"github.com/glichtv/kick-sdk/internal/publickey"
 	"io"
 	"net/http"
 )

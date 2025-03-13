@@ -1,11 +1,11 @@
-package kickkit
+package kicksdk
 
 import (
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/glichtv/kick-kit/internal/urloptional"
+	"github.com/glichtv/kick-sdk/internal/urloptional"
 	"io"
 	"net/http"
 )

@@ -1,8 +1,8 @@
-package kickkit
+package kicksdk
 
 import (
 	"context"
-	"github.com/glichtv/kick-kit/internal/urloptional"
+	"github.com/glichtv/kick-sdk/internal/urloptional"
 	"net/http"
 	"strconv"
 )

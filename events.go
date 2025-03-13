@@ -1,4 +1,4 @@
-package kickkit
+package kicksdk
 
 import "time"
 

@@ -1,8 +1,8 @@
-package kickkit
+package kicksdk
 
 import (
 	"context"
-	"github.com/glichtv/kick-kit/internal/urloptional"
+	"github.com/glichtv/kick-sdk/internal/urloptional"
 	"net/http"
 )
 
@@ -31,10 +31,10 @@ func (c *Client) Events() Events {
 	return Events{client: c}
 }
 
-// Subscriptions retrieves events subscriptions based on the authorization token.
+// GetSubscriptions retrieves events subscriptions based on the authorization token.
 //
 // Reference: https://docs.kick.com/events/subscribe-to-events#events-subscriptions
-func (e Events) Subscriptions(ctx context.Context) (Response[[]EventSubscription], error) {
+func (e Events) GetSubscriptions(ctx context.Context) (Response[[]EventSubscription], error) {
 	const resource = "public/v1/events/subscriptions"
 
 	apiRequest := newAPIRequest[[]EventSubscription](
