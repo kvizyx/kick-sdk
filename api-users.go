@@ -35,19 +35,22 @@ func (c *Client) Users() Users {
 //
 // Reference: https://docs.kick.com/apis/users#token-introspect
 func (u Users) InspectToken(ctx context.Context) (Response[TokenInfo], error) {
-	const resource = "public/v1/token/introspect"
+	resource := Resource{
+		Type: ResourceTypeAPI,
+		Path: "public/v1/token/introspect",
+	}
 
-	apiRequest := newAPIRequest[TokenInfo](
+	request := NewRequest[TokenInfo](
 		ctx,
 		u.client,
-		requestOptions{
-			resource: resource,
-			method:   http.MethodPost,
-			authType: AuthTypeUserToken,
+		RequestOptions{
+			Resource: resource,
+			Method:   http.MethodPost,
+			AuthType: AuthTypeUserToken,
 		},
 	)
 
-	return apiRequest.execute()
+	return request.Execute()
 }
 
 type GetUsersByIDsInput struct {
@@ -58,7 +61,10 @@ type GetUsersByIDsInput struct {
 //
 // Reference: https://docs.kick.com/apis/users#users
 func (u Users) GetByIDs(ctx context.Context, input GetUsersByIDsInput) (Response[[]User], error) {
-	const resource = "public/v1/users"
+	resource := Resource{
+		Type: ResourceTypeAPI,
+		Path: "public/v1/token/users",
+	}
 
 	usersIDs := make([]string, len(input.UsersIDs))
 
@@ -66,18 +72,18 @@ func (u Users) GetByIDs(ctx context.Context, input GetUsersByIDsInput) (Response
 		usersIDs[index] = strconv.Itoa(userID)
 	}
 
-	apiRequest := newAPIRequest[[]User](
+	request := NewRequest[[]User](
 		ctx,
 		u.client,
-		requestOptions{
-			resource: resource,
-			method:   http.MethodGet,
-			authType: AuthTypeUserToken,
-			urlValues: urloptional.Values{
+		RequestOptions{
+			Resource: resource,
+			Method:   http.MethodGet,
+			AuthType: AuthTypeUserToken,
+			URLValues: urloptional.Values{
 				"id": urloptional.Many(usersIDs),
 			},
 		},
 	)
 
-	return apiRequest.execute()
+	return request.Execute()
 }

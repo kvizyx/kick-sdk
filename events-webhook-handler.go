@@ -10,9 +10,7 @@ import (
 	"net/http"
 )
 
-var (
-	ErrUnexpectedEventType = errors.New("unexpected event type")
-)
+var ErrUnexpectedEventType = errors.New("unexpected event type")
 
 type (
 	WebhookEventHeader struct {
@@ -62,7 +60,7 @@ func (weh *WebhookEventsHandler) ServeHTTP(w http.ResponseWriter, request *http.
 
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
-		http.Error(w, "Cannot read request body", http.StatusInternalServerError)
+		http.Error(w, "Cannot read Request Body", http.StatusInternalServerError)
 		return
 	}
 	defer func() {
@@ -103,7 +101,7 @@ func (weh *WebhookEventsHandler) handleEvent(ctx context.Context, header Webhook
 		var event EventChatMessage
 
 		if err := json.Unmarshal(body, &event); err != nil {
-			return fmt.Errorf("unmarshal event body: %w", err)
+			return fmt.Errorf("unmarshal event Body: %w", err)
 		}
 
 		if weh.OnChatMessage != nil {
@@ -113,7 +111,7 @@ func (weh *WebhookEventsHandler) handleEvent(ctx context.Context, header Webhook
 		var event EventChannelFollow
 
 		if err := json.Unmarshal(body, &event); err != nil {
-			return fmt.Errorf("unmarshal event body: %w", err)
+			return fmt.Errorf("unmarshal event Body: %w", err)
 		}
 
 		if weh.OnChannelFollow != nil {
@@ -123,7 +121,7 @@ func (weh *WebhookEventsHandler) handleEvent(ctx context.Context, header Webhook
 		var event EventChannelSubscriptionRenewal
 
 		if err := json.Unmarshal(body, &event); err != nil {
-			return fmt.Errorf("unmarshal event body: %w", err)
+			return fmt.Errorf("unmarshal event Body: %w", err)
 		}
 
 		if weh.OnChannelSubscriptionRenewal != nil {
@@ -133,7 +131,7 @@ func (weh *WebhookEventsHandler) handleEvent(ctx context.Context, header Webhook
 		var event EventChannelSubscriptionGifts
 
 		if err := json.Unmarshal(body, &event); err != nil {
-			return fmt.Errorf("unmarshal event body: %w", err)
+			return fmt.Errorf("unmarshal event Body: %w", err)
 		}
 
 		if weh.OnChannelSubscriptionGifts != nil {
@@ -143,7 +141,7 @@ func (weh *WebhookEventsHandler) handleEvent(ctx context.Context, header Webhook
 		var event EventChannelSubscriptionCreated
 
 		if err := json.Unmarshal(body, &event); err != nil {
-			return fmt.Errorf("unmarshal event body: %w", err)
+			return fmt.Errorf("unmarshal event Body: %w", err)
 		}
 
 		if weh.OnChannelSubscriptionCreated != nil {
@@ -153,7 +151,7 @@ func (weh *WebhookEventsHandler) handleEvent(ctx context.Context, header Webhook
 		var event EventLivestreamStatusUpdated
 
 		if err := json.Unmarshal(body, &event); err != nil {
-			return fmt.Errorf("unmarshal event body: %w", err)
+			return fmt.Errorf("unmarshal event Body: %w", err)
 		}
 
 		if weh.OnLivestreamStatusUpdated != nil {

@@ -13,17 +13,20 @@ type PublicKeyOutput struct {
 //
 // Reference: https://docs.kick.com/apis/public-key#public-key
 func (c *Client) PublicKey(ctx context.Context) (Response[PublicKeyOutput], error) {
-	const resource = "public/v1/public-key"
+	resource := Resource{
+		Type: ResourceTypeAPI,
+		Path: "public/v1/public-key",
+	}
 
-	apiRequest := newAPIRequest[PublicKeyOutput](
+	request := NewRequest[PublicKeyOutput](
 		ctx,
 		c,
-		requestOptions{
-			resource: resource,
-			authType: AuthTypeUserToken,
-			method:   http.MethodGet,
+		RequestOptions{
+			Resource: resource,
+			AuthType: AuthTypeUserToken,
+			Method:   http.MethodGet,
 		},
 	)
 
-	return apiRequest.execute()
+	return request.Execute()
 }

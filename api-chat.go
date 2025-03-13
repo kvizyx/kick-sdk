@@ -40,23 +40,26 @@ type (
 //
 // Reference: https://docs.kick.com/apis/chat#chat
 func (c Chat) PostMessage(ctx context.Context, input PostChatMessageInput) (Response[PostChatMessageOutput], error) {
-	const resource = "public/v1/chat"
+	resource := Resource{
+		Type: ResourceTypeAPI,
+		Path: "public/v1/chat",
+	}
 
 	// When sending as a user, the broadcaster user ID is required.
 	if input.PosterType == MessagePosterUser && input.BroadcasterUserId <= 0 {
 		return Response[PostChatMessageOutput]{}, ErrNoBroadcasterID
 	}
 
-	apiRequest := newAPIRequest[PostChatMessageOutput](
+	request := NewRequest[PostChatMessageOutput](
 		ctx,
 		c.client,
-		requestOptions{
-			resource: resource,
-			method:   http.MethodPost,
-			authType: AuthTypeUserToken,
-			body:     input,
+		RequestOptions{
+			Resource: resource,
+			Method:   http.MethodPost,
+			AuthType: AuthTypeUserToken,
+			Body:     input,
 		},
 	)
 
-	return apiRequest.execute()
+	return request.Execute()
 }

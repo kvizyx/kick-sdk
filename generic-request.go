@@ -10,79 +10,37 @@ import (
 	"net/http"
 )
 
-type requestTarget int
-
-const (
-	requestTargetAPI requestTarget = iota
-	requestTargetAuth
-)
-
 type (
-	request[Output any] struct {
+	Request[Output any] struct {
 		ctx     context.Context
 		client  *Client
-		target  requestTarget
-		options requestOptions
+		options RequestOptions
 	}
 
-	requestOptions struct {
-		resource  string
-		method    string
-		authType  AuthorizationType
-		urlValues urloptional.Values
-		body      any
+	RequestOptions struct {
+		Resource  Resource
+		Method    string
+		AuthType  AuthorizationType
+		URLValues urloptional.Values
+		Body      any
 	}
 )
 
-func newAPIRequest[Output any](ctx context.Context, client *Client, ro requestOptions) request[Output] {
-	return request[Output]{
+func NewRequest[Output any](ctx context.Context, client *Client, options RequestOptions) Request[Output] {
+	return Request[Output]{
 		ctx:     ctx,
 		client:  client,
-		target:  requestTargetAPI,
-		options: ro,
+		options: options,
 	}
 }
 
-func newAuthRequest[Output any](ctx context.Context, client *Client, ro requestOptions) request[Output] {
-	return request[Output]{
-		ctx:     ctx,
-		client:  client,
-		target:  requestTargetAuth,
-		options: ro,
-	}
-}
-
-func (r request[Output]) execute() (Response[Output], error) {
-	var endpointURL string
-
-	switch r.target {
-	case requestTargetAPI:
-		endpointURL = APIBaseURL.WithResource(r.options.resource)
-	case requestTargetAuth:
-		endpointURL = AuthBaseURL.WithResource(r.options.resource)
-	}
-
-	if r.options.urlValues != nil {
-		endpointURL = fmt.Sprintf("%s?%s", endpointURL, r.options.urlValues.Encode())
-	}
-
-	req, err := http.NewRequestWithContext(r.ctx, r.options.method, endpointURL, nil)
+func (r Request[Output]) Execute() (Response[Output], error) {
+	request, err := r.Build()
 	if err != nil {
-		return Response[Output]{}, fmt.Errorf("new request with context: %w", err)
+		return Response[Output]{}, fmt.Errorf("build request: %w", err)
 	}
 
-	switch r.options.authType {
-	case AuthTypeUserToken:
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", r.client.tokens.UserAccessToken))
-	}
-
-	if r.options.body != nil {
-		if err = setRequestBody(req, r.options.body); err != nil {
-			return Response[Output]{}, fmt.Errorf("set request body: %w", err)
-		}
-	}
-
-	response, err := r.client.httpClient.Do(req)
+	response, err := r.client.httpClient.Do(request)
 	if err != nil {
 		return Response[Output]{}, fmt.Errorf("do request: %w", err)
 	}
@@ -90,82 +48,123 @@ func (r request[Output]) execute() (Response[Output], error) {
 		_ = response.Body.Close()
 	}()
 
-	return r.parseResponse(response)
+	return parseResponse[Output](response, r.options.Resource.Type)
 }
 
-func (r request[Output]) parseResponse(response *http.Response) (Response[Output], error) {
+// Build builds an HTTP request based on the original RequestOptions.
+func (r Request[Output]) Build() (*http.Request, error) {
+	resourceURL := r.options.Resource.URL()
+
+	if r.options.URLValues != nil {
+		resourceURL = fmt.Sprintf("%s?%s", resourceURL, r.options.URLValues.Encode())
+	}
+
+	request, err := http.NewRequestWithContext(r.ctx, r.options.Method, resourceURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("new request with context: %w", err)
+	}
+
+	switch r.options.AuthType {
+	case AuthTypeUserToken:
+		request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", r.client.tokens.UserAccessToken))
+	}
+
+	if r.options.Body != nil {
+		if err = setRequestBody(request, r.options.Body); err != nil {
+			return nil, fmt.Errorf("set request Body: %w", err)
+		}
+	}
+
+	return request, nil
+}
+
+func parseResponse[Output any](response *http.Response, resource ResourceType) (Response[Output], error) {
 	metadata := ResponseMetadata{
 		StatusCode: response.StatusCode,
 		Header:     response.Header,
 	}
 
 	if response.StatusCode == http.StatusNoContent {
-		return Response[Output]{ResponseMetadata: metadata}, nil
+		return Response[Output]{
+			ResponseMetadata: metadata,
+		}, nil
 	}
 
-	switch r.target {
-	case requestTargetAPI:
-		// For some reason, Kick responds to unsuccessful requests with an object in the data field on endpoints where it
-		// should be an array or null, so we need to manually set empty output to avoid parsing error.
-		if response.StatusCode > http.StatusPermanentRedirect {
-			var output apiResponse[EmptyResponse]
-
-			if err := json.NewDecoder(response.Body).Decode(&output); err != nil {
-				return Response[Output]{}, fmt.Errorf("decode response body: %w", err)
-			}
-
-			metadata.KickMessage = output.Message
-
-			return Response[Output]{ResponseMetadata: metadata}, nil
-		}
-
-		var output apiResponse[Output]
-
-		if err := json.NewDecoder(response.Body).Decode(&output); err != nil {
-			return Response[Output]{}, fmt.Errorf("decode response body: %w", err)
-		}
-
-		metadata.KickMessage = output.Message
-
-		return Response[Output]{
-			Data:             output.Data,
-			ResponseMetadata: metadata,
-		}, nil
-	case requestTargetAuth:
-		if response.StatusCode != http.StatusOK {
-			var errorOutput authErrorResponse
-
-			if err := json.NewDecoder(response.Body).Decode(&errorOutput); err != nil {
-				return Response[Output]{}, fmt.Errorf("decode error response body: %w", err)
-			}
-
-			metadata.KickError = errorOutput.Error
-			metadata.KickErrorDescription = errorOutput.ErrorDescription
-
-			return Response[Output]{ResponseMetadata: metadata}, nil
-		}
-
-		var output Output
-
-		if err := json.NewDecoder(response.Body).Decode(&output); err != nil {
-			return Response[Output]{}, fmt.Errorf("decode response body: %w", err)
-		}
-
-		return Response[Output]{
-			Data:             output,
-			ResponseMetadata: metadata,
-		}, nil
+	switch resource {
+	case ResourceTypeAPI:
+		return parseAPIResponse[Output](response, metadata)
+	case ResourceTypeID:
+		return parseIDResponse[Output](response, metadata)
 	}
 
 	return Response[Output]{}, nil
 }
 
-// setRequestBody defines a body type and sets it to a request with an appropriate content type header.
-func setRequestBody(request *http.Request, body any) error {
-	if urlValues, isForm := body.(urloptional.Values); isForm {
-		buffer := bytes.NewBuffer([]byte(urlValues.Encode()))
+func parseAPIResponse[Output any](response *http.Response, meta ResponseMetadata) (Response[Output], error) {
+	// For some reason, Kick responds to unsuccessful requests with an object in the data field on endpoints where it
+	// should be an array or null, so we need to manually set empty output to avoid parsing error.
+	if response.StatusCode > http.StatusPermanentRedirect {
+		var output apiResponse[EmptyResponse]
 
-		request.Body = io.NopCloser(buffer)
+		if err := json.NewDecoder(response.Body).Decode(&output); err != nil {
+			return Response[Output]{}, fmt.Errorf("decode response Body: %w", err)
+		}
+
+		meta.KickMessage = output.Message
+
+		return Response[Output]{
+			ResponseMetadata: meta,
+		}, nil
+	}
+
+	var output apiResponse[Output]
+
+	if err := json.NewDecoder(response.Body).Decode(&output); err != nil {
+		return Response[Output]{}, fmt.Errorf("decode response Body: %w", err)
+	}
+
+	meta.KickMessage = output.Message
+
+	return Response[Output]{
+		Data:             output.Data,
+		ResponseMetadata: meta,
+	}, nil
+}
+
+func parseIDResponse[Output any](response *http.Response, meta ResponseMetadata) (Response[Output], error) {
+	if response.StatusCode != http.StatusOK {
+		var errorOutput authErrorResponse
+
+		if err := json.NewDecoder(response.Body).Decode(&errorOutput); err != nil {
+			return Response[Output]{}, fmt.Errorf("decode error response Body: %w", err)
+		}
+
+		meta.KickError = errorOutput.Error
+		meta.KickErrorDescription = errorOutput.ErrorDescription
+
+		return Response[Output]{
+			ResponseMetadata: meta,
+		}, nil
+	}
+
+	var output Output
+
+	if err := json.NewDecoder(response.Body).Decode(&output); err != nil {
+		return Response[Output]{}, fmt.Errorf("decode response Body: %w", err)
+	}
+
+	return Response[Output]{
+		Data:             output,
+		ResponseMetadata: meta,
+	}, nil
+}
+
+// setRequestBody defines a Body type and sets it to a Request with an appropriate content type header.
+func setRequestBody(request *http.Request, body any) error {
+	if urlValues, isURLValues := body.(urloptional.Values); isURLValues {
+		bodyBuffer := bytes.NewBuffer([]byte(urlValues.Encode()))
+
+		request.Body = io.NopCloser(bodyBuffer)
 		request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 		return nil
@@ -173,12 +172,12 @@ func setRequestBody(request *http.Request, body any) error {
 
 	bodyBytes, err := json.Marshal(body)
 	if err != nil {
-		return fmt.Errorf("marshal request body: %w", err)
+		return fmt.Errorf("marshal request Body: %w", err)
 	}
 
-	buffer := bytes.NewBuffer(bodyBytes)
+	bodyBuffer := bytes.NewBuffer(bodyBytes)
 
-	request.Body = io.NopCloser(buffer)
+	request.Body = io.NopCloser(bodyBuffer)
 	request.Header.Set("Content-Type", "application/json")
 
 	return nil

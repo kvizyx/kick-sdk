@@ -4,6 +4,11 @@ import (
 	"net/http"
 )
 
+const (
+	APIBaseURL = "https://api.kick.com"
+	IDBaseURL  = "https://id.kick.com"
+)
+
 type Client struct {
 	httpClient HTTPClient
 

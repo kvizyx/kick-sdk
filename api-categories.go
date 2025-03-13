@@ -29,22 +29,25 @@ type SearchCategoriesInput struct {
 //
 // Reference: https://docs.kick.com/apis/categories#categories
 func (c Categories) Search(ctx context.Context, input SearchCategoriesInput) (Response[[]Category], error) {
-	const resource = "public/v1/categories"
+	resource := Resource{
+		Type: ResourceTypeAPI,
+		Path: "public/v1/categories",
+	}
 
-	apiRequest := newAPIRequest[[]Category](
+	request := NewRequest[[]Category](
 		ctx,
 		c.client,
-		requestOptions{
-			resource: resource,
-			method:   http.MethodGet,
-			authType: AuthTypeUserToken,
-			urlValues: urloptional.Values{
+		RequestOptions{
+			Resource: resource,
+			Method:   http.MethodGet,
+			AuthType: AuthTypeUserToken,
+			URLValues: urloptional.Values{
 				"q": urloptional.Single(input.Query),
 			},
 		},
 	)
 
-	return apiRequest.execute()
+	return request.Execute()
 }
 
 type GetCategoryByIDInput struct {
@@ -55,17 +58,20 @@ type GetCategoryByIDInput struct {
 //
 // Reference: https://docs.kick.com/apis/categories#categories-category_id
 func (c Categories) GetByID(ctx context.Context, input GetCategoryByIDInput) (Response[Category], error) {
-	const resource = "public/v1/categories"
+	resource := Resource{
+		Type: ResourceTypeAPI,
+		Path: fmt.Sprintf("%s/%d", "public/v1/categories", input.CategoryID),
+	}
 
-	apiRequest := newAPIRequest[Category](
+	request := NewRequest[Category](
 		ctx,
 		c.client,
-		requestOptions{
-			resource: fmt.Sprintf("%s/%d", resource, input.CategoryID),
-			method:   http.MethodGet,
-			authType: AuthTypeUserToken,
+		RequestOptions{
+			Resource: resource,
+			Method:   http.MethodGet,
+			AuthType: AuthTypeUserToken,
 		},
 	)
 
-	return apiRequest.execute()
+	return request.Execute()
 }

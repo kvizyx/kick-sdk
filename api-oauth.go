@@ -31,11 +31,14 @@ type AuthorizationURLInput struct {
 }
 
 // AuthorizationURL returns URL to the authorization page where they can log in and approve the application's
-// access request.
+// access Request.
 //
 // Reference: https://docs.kick.com/getting-started/generating-tokens-oauth2-flow#authorization-endpoint
 func (o OAuth) AuthorizationURL(input AuthorizationURLInput) string {
-	const resource = "oauth/authorize"
+	resource := Resource{
+		Type: ResourceTypeID,
+		Path: "oauth/authorize",
+	}
 
 	scopes := make([]string, len(input.Scopes))
 
@@ -53,7 +56,7 @@ func (o OAuth) AuthorizationURL(input AuthorizationURLInput) string {
 		"code_challenge_method": urloptional.Single("S256"),
 	}
 
-	return fmt.Sprintf("%s?%s", AuthBaseURL.WithResource(resource), values.Encode())
+	return fmt.Sprintf("%s?%s", resource.URL(), values.Encode())
 }
 
 type ExchangeCodeInput struct {
@@ -67,12 +70,15 @@ type ExchangeCodeInput struct {
 //
 // Reference: https://docs.kick.com/getting-started/generating-tokens-oauth2-flow#token-endpoint
 func (o OAuth) ExchangeCode(ctx context.Context, input ExchangeCodeInput) (Response[AccessToken], error) {
-	const resource = "oauth/token"
+	resource := Resource{
+		Type: ResourceTypeID,
+		Path: "oauth/token",
+	}
 
-	authRequest := newAuthRequest[AccessToken](ctx, o.client, requestOptions{
-		resource: resource,
-		method:   http.MethodPost,
-		body: urloptional.Values{
+	request := NewRequest[AccessToken](ctx, o.client, RequestOptions{
+		Resource: resource,
+		Method:   http.MethodPost,
+		Body: urloptional.Values{
 			"code":          urloptional.Single(input.Code),
 			"client_id":     urloptional.Single(o.client.credentials.ClientID),
 			"client_secret": urloptional.Single(o.client.credentials.ClientSecret),
@@ -82,7 +88,7 @@ func (o OAuth) ExchangeCode(ctx context.Context, input ExchangeCodeInput) (Respo
 		},
 	})
 
-	return authRequest.execute()
+	return request.Execute()
 }
 
 type RefreshTokenInput struct {
@@ -94,12 +100,15 @@ type RefreshTokenInput struct {
 //
 // Reference: https://docs.kick.com/getting-started/generating-tokens-oauth2-flow#refresh-token-endpoint
 func (o OAuth) RefreshToken(ctx context.Context, input RefreshTokenInput) (Response[AccessToken], error) {
-	const resource = "oauth/token"
+	resource := Resource{
+		Type: ResourceTypeID,
+		Path: "oauth/token",
+	}
 
-	authRequest := newAuthRequest[AccessToken](ctx, o.client, requestOptions{
-		resource: resource,
-		method:   http.MethodPost,
-		body: urloptional.Values{
+	request := NewRequest[AccessToken](ctx, o.client, RequestOptions{
+		Resource: resource,
+		Method:   http.MethodPost,
+		Body: urloptional.Values{
 			"refresh_token": urloptional.Single(input.RefreshToken),
 			"client_id":     urloptional.Single(o.client.credentials.ClientID),
 			"client_secret": urloptional.Single(o.client.credentials.ClientSecret),
@@ -107,7 +116,7 @@ func (o OAuth) RefreshToken(ctx context.Context, input RefreshTokenInput) (Respo
 		},
 	})
 
-	return authRequest.execute()
+	return request.Execute()
 }
 
 type RevokeTokenInput struct {
@@ -119,16 +128,19 @@ type RevokeTokenInput struct {
 //
 // Reference: https://docs.kick.com/getting-started/generating-tokens-oauth2-flow#revoke-token-endpoint
 func (o OAuth) RevokeToken(ctx context.Context, input RevokeTokenInput) (Response[EmptyResponse], error) {
-	const resource = "oauth/revoke"
+	resource := Resource{
+		Type: ResourceTypeID,
+		Path: "oauth/revoke",
+	}
 
-	authRequest := newAuthRequest[EmptyResponse](ctx, o.client, requestOptions{
-		resource: resource,
-		method:   http.MethodPost,
-		body: urloptional.Values{
+	request := NewRequest[EmptyResponse](ctx, o.client, RequestOptions{
+		Resource: resource,
+		Method:   http.MethodPost,
+		Body: urloptional.Values{
 			"token":           urloptional.Single(input.Token),
 			"token_hint_type": urloptional.Single(input.TokenHintType),
 		},
 	})
 
-	return authRequest.execute()
+	return request.Execute()
 }

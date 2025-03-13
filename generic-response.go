@@ -15,7 +15,7 @@ type (
 )
 
 // EmptyResponse is a response that is used as a stub in case endpoint is not returning any
-// data in response body.
+// data in response Body.
 type EmptyResponse struct{}
 
 // Response is a response that will be returned to the user as a result of a call to any
@@ -31,7 +31,7 @@ type ResponseMetadata struct {
 	Header     http.Header
 
 	// KickMessage is a message that Kick sends along with the optional data in response to the API requests.
-	// In case of an unsuccessful request it will contain error message as to why the request failed.
+	// In case of an unsuccessful Request it will contain error message as to why the Request failed.
 	KickMessage          string
 	KickError            string
 	KickErrorDescription string

@@ -45,7 +45,10 @@ type GetChannelsInput struct {
 //
 // Reference: https://docs.kick.com/apis/channels#channels
 func (c Channels) GetByBroadcasterID(ctx context.Context, input GetChannelsInput) (Response[[]Channel], error) {
-	const resource = "public/v1/channels"
+	resource := Resource{
+		Type: ResourceTypeAPI,
+		Path: "public/v1/channels",
+	}
 
 	broadcasterIDs := make([]string, len(input.BroadcasterUserIDs))
 
@@ -53,20 +56,20 @@ func (c Channels) GetByBroadcasterID(ctx context.Context, input GetChannelsInput
 		broadcasterIDs[index] = strconv.Itoa(broadcasterID)
 	}
 
-	apiRequest := newAPIRequest[[]Channel](
+	request := NewRequest[[]Channel](
 		ctx,
 		c.client,
-		requestOptions{
-			resource: resource,
-			method:   http.MethodGet,
-			authType: AuthTypeUserToken,
-			urlValues: urloptional.Values{
+		RequestOptions{
+			Resource: resource,
+			Method:   http.MethodGet,
+			AuthType: AuthTypeUserToken,
+			URLValues: urloptional.Values{
 				"broadcaster_user_id": urloptional.Many(broadcasterIDs),
 			},
 		},
 	)
 
-	return apiRequest.execute()
+	return request.Execute()
 }
 
 type UpdateStreamInput struct {
@@ -78,18 +81,21 @@ type UpdateStreamInput struct {
 //
 // Reference: https://docs.kick.com/apis/channels#channels-1
 func (c Channels) UpdateStream(ctx context.Context, input UpdateStreamInput) (Response[EmptyResponse], error) {
-	const resource = "public/v1/channels"
+	resource := Resource{
+		Type: ResourceTypeAPI,
+		Path: "public/v1/channels",
+	}
 
-	apiRequest := newAPIRequest[EmptyResponse](
+	request := NewRequest[EmptyResponse](
 		ctx,
 		c.client,
-		requestOptions{
-			resource: resource,
-			method:   http.MethodPatch,
-			authType: AuthTypeUserToken,
-			body:     input,
+		RequestOptions{
+			Resource: resource,
+			Method:   http.MethodPatch,
+			AuthType: AuthTypeUserToken,
+			Body:     input,
 		},
 	)
 
-	return apiRequest.execute()
+	return request.Execute()
 }

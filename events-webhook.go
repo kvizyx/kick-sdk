@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// ExtractWebhookEventHeader extracts all Kick's event-specific headers from the provided request
+// ExtractWebhookEventHeader extracts all Kick's event-specific headers from the provided Request
 // and returns it as a WebhookEventHeader.
 //
 // Reference: https://docs.kick.com/events/webhook-security#headers
@@ -21,8 +21,8 @@ func ExtractWebhookEventHeader(request *http.Request) WebhookEventHeader {
 	}
 }
 
-// VerifyWebhookEvent verifies webhook event signature to ensure that event with provided header and body
-// was actually sent from the Kick server.
+// VerifyWebhookEvent verifies webhook event signature to ensure that event with provided header and Body
+// was actually sent from the Kick's server.
 //
 // Reference: https://docs.kick.com/events/webhook-security#webhook-sender-validation
 func VerifyWebhookEvent(header WebhookEventHeader, publicKey string, body []byte) error {
