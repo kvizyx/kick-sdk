@@ -1,9 +1,0 @@
-1. Refactor generic-request
-2. Setup linter
-3. Write tests
-4. Add more comments for methods and types
-5. Probably setup codecov
-6. Setup GitHub actions
-7. Write documentation with examples
-8. Write README
-9. Release and make pull request to Kick's dev repository to include my SDK in community projects
