@@ -2,7 +2,7 @@ package kickkit
 
 import (
 	"context"
-	urloptional "github.com/glichtv/kick-kit/internal/url-optional"
+	"github.com/glichtv/kick-kit/internal/urloptional"
 	"net/http"
 	"strconv"
 )
@@ -41,10 +41,10 @@ type GetChannelsInput struct {
 	BroadcasterUserIDs []int
 }
 
-// ByBroadcasterID retrieves Channel information based on provided broadcaster IDs.
+// GetByBroadcasterID retrieves Channel information based on provided broadcaster IDs.
 //
 // Reference: https://docs.kick.com/apis/channels#channels
-func (c Channels) ByBroadcasterID(ctx context.Context, input GetChannelsInput) (Response[[]Channel], error) {
+func (c Channels) GetByBroadcasterID(ctx context.Context, input GetChannelsInput) (Response[[]Channel], error) {
 	const resource = "public/v1/channels"
 
 	broadcasterIDs := make([]string, len(input.BroadcasterUserIDs))

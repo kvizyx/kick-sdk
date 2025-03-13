@@ -3,7 +3,7 @@ package kickkit
 import (
 	"context"
 	"fmt"
-	urloptional "github.com/glichtv/kick-kit/internal/url-optional"
+	"github.com/glichtv/kick-kit/internal/urloptional"
 	"net/http"
 )
 

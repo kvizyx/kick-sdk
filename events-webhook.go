@@ -2,7 +2,7 @@ package kickkit
 
 import (
 	"fmt"
-	"github.com/glichtv/kick-kit/internal/public-key"
+	"github.com/glichtv/kick-kit/internal/publickey"
 	"net/http"
 )
 

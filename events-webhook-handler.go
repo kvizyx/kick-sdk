@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/glichtv/kick-kit/internal/public-key"
+	"github.com/glichtv/kick-kit/internal/publickey"
 	"io"
 	"net/http"
 )

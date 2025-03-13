@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	urloptional "github.com/glichtv/kick-kit/internal/url-optional"
+	"github.com/glichtv/kick-kit/internal/urloptional"
 	"io"
 	"net/http"
 )

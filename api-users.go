@@ -2,7 +2,7 @@ package kickkit
 
 import (
 	"context"
-	urloptional "github.com/glichtv/kick-kit/internal/url-optional"
+	"github.com/glichtv/kick-kit/internal/urloptional"
 	"net/http"
 	"strconv"
 )
@@ -54,10 +54,10 @@ type GetUsersByIDsInput struct {
 	UsersIDs []int
 }
 
-// ByIDs retrieves user information based on provided user IDs.
+// GetByIDs retrieves user information based on provided user IDs.
 //
 // Reference: https://docs.kick.com/apis/users#users
-func (u Users) ByIDs(ctx context.Context, input GetUsersByIDsInput) (Response[[]User], error) {
+func (u Users) GetByIDs(ctx context.Context, input GetUsersByIDsInput) (Response[[]User], error) {
 	const resource = "public/v1/users"
 
 	usersIDs := make([]string, len(input.UsersIDs))

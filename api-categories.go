@@ -3,7 +3,7 @@ package kickkit
 import (
 	"context"
 	"fmt"
-	urloptional "github.com/glichtv/kick-kit/internal/url-optional"
+	"github.com/glichtv/kick-kit/internal/urloptional"
 	"net/http"
 )
 
@@ -51,10 +51,10 @@ type GetCategoryByIDInput struct {
 	CategoryID int
 }
 
-// ByID retrieves Category based on it's ID.
+// GetByID retrieves Category based on it's ID.
 //
 // Reference: https://docs.kick.com/apis/categories#categories-category_id
-func (c Categories) ByID(ctx context.Context, input GetCategoryByIDInput) (Response[Category], error) {
+func (c Categories) GetByID(ctx context.Context, input GetCategoryByIDInput) (Response[Category], error) {
 	const resource = "public/v1/categories"
 
 	apiRequest := newAPIRequest[Category](
