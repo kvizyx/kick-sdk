@@ -2,34 +2,33 @@ package kickkit
 
 import (
 	"context"
-	optionalvalues "github.com/glichtv/kick-kit/internal/optional-values"
+	urloptional "github.com/glichtv/kick-kit/internal/url-optional"
 	"net/http"
 )
 
-type (
-	Event struct {
-		Name    string
-		Version int
-	}
+type EventSubscription struct {
+	ID                string `json:"id"`
+	AppID             string `json:"app_id"`
+	BroadcasterUserID int    `json:"broadcaster_user_id"`
+	Event             string `json:"event"`
+	Method            string `json:"method"`
+	Version           int    `json:"version"`
+	UpdatedAt         string `json:"updated_at"`
+	CreatedAt         string `json:"created_at"`
+}
 
-	EventSubscription struct {
-		ID                string `json:"id"`
-		AppID             string `json:"app_id"`
-		BroadcasterUserID int    `json:"broadcaster_user_id"`
-		Event             string `json:"event"`
-		Method            string `json:"method"`
-		Version           int    `json:"version"`
-		UpdatedAt         string `json:"updated_at"`
-		CreatedAt         string `json:"created_at"`
-	}
+type EventSubscriptionMethod string
+
+const (
+	EventSubscriptionWebhook EventSubscriptionMethod = "webhook"
 )
 
 type Events struct {
 	client *Client
 }
 
-func (c *Client) Events() Channels {
-	return Channels{client: c}
+func (c *Client) Events() Events {
+	return Events{client: c}
 }
 
 // Subscriptions retrieves events subscriptions based on the authorization token.
@@ -52,8 +51,13 @@ func (e Events) Subscriptions(ctx context.Context) (Response[[]EventSubscription
 }
 
 type (
+	EventInput struct {
+		Type    string `json:"name"`
+		Version int    `json:"version"`
+	}
+
 	SubscribeEventsInput struct {
-		Events []Events                `json:"events"`
+		Events []EventInput            `json:"events"`
 		Method EventSubscriptionMethod `json:"method,omitempty"`
 	}
 
@@ -102,8 +106,8 @@ func (e Events) Unsubscribe(ctx context.Context, input UnsubscribeEventsInput) (
 			resource: resource,
 			method:   http.MethodDelete,
 			authType: AuthTypeUserToken,
-			urlValues: optionalvalues.Values{
-				"id": optionalvalues.Many(input.EventsIDs),
+			urlValues: urloptional.Values{
+				"id": urloptional.Many(input.EventsIDs),
 			},
 		},
 	)

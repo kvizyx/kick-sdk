@@ -2,7 +2,7 @@ package kickkit
 
 import (
 	"context"
-	optionalvalues "github.com/glichtv/kick-kit/internal/optional-values"
+	urloptional "github.com/glichtv/kick-kit/internal/url-optional"
 	"net/http"
 	"strconv"
 )
@@ -60,8 +60,8 @@ func (c Channels) ByBroadcasterID(ctx context.Context, input GetChannelsInput) (
 			resource: resource,
 			method:   http.MethodGet,
 			authType: AuthTypeUserToken,
-			urlValues: optionalvalues.Values{
-				"broadcaster_user_id": optionalvalues.Many(broadcasterIDs),
+			urlValues: urloptional.Values{
+				"broadcaster_user_id": urloptional.Many(broadcasterIDs),
 			},
 		},
 	)

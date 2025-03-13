@@ -5,7 +5,6 @@ import (
 	"sync"
 )
 
-// EventsTracker provides a mechanism to track for duplicate events.
 type EventsTracker interface {
 	// Track starts tracking an event with the provided ID and returns if that event is already
 	// being tracked (meaning it is duplicate).
@@ -25,8 +24,8 @@ func NewMapEventsTracker() *MapEventsTracker {
 }
 
 func (met *MapEventsTracker) Track(_ context.Context, eventID string) (bool, error) {
-	_, ok := met.events[eventID]
-	if ok {
+	_, exist := met.events[eventID]
+	if exist {
 		return true, nil
 	}
 

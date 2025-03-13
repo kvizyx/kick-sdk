@@ -3,7 +3,7 @@ package kickkit
 import (
 	"context"
 	"fmt"
-	optionalvalues "github.com/glichtv/kick-kit/internal/optional-values"
+	urloptional "github.com/glichtv/kick-kit/internal/url-optional"
 	"net/http"
 )
 
@@ -43,14 +43,14 @@ func (o OAuth) AuthorizationURL(input AuthorizationURLInput) string {
 		scopes[index] = string(scope)
 	}
 
-	values := optionalvalues.Values{
-		"client_id":             optionalvalues.Single(o.client.credentials.ClientID),
-		"response_type":         optionalvalues.Single(input.ResponseType),
-		"redirect_uri":          optionalvalues.Single(o.client.credentials.RedirectURI),
-		"scope":                 optionalvalues.Join(scopes, " "),
-		"state":                 optionalvalues.Single(input.State),
-		"code_challenge":        optionalvalues.Single(input.CodeChallenge),
-		"code_challenge_method": optionalvalues.Single("S256"),
+	values := urloptional.Values{
+		"client_id":             urloptional.Single(o.client.credentials.ClientID),
+		"response_type":         urloptional.Single(input.ResponseType),
+		"redirect_uri":          urloptional.Single(o.client.credentials.RedirectURI),
+		"scope":                 urloptional.Join(scopes, " "),
+		"state":                 urloptional.Single(input.State),
+		"code_challenge":        urloptional.Single(input.CodeChallenge),
+		"code_challenge_method": urloptional.Single("S256"),
 	}
 
 	return fmt.Sprintf("%s?%s", AuthBaseURL.WithResource(resource), values.Encode())
@@ -72,13 +72,13 @@ func (o OAuth) ExchangeCode(ctx context.Context, input ExchangeCodeInput) (Respo
 	authRequest := newAuthRequest[AccessToken](ctx, o.client, requestOptions{
 		resource: resource,
 		method:   http.MethodPost,
-		body: optionalvalues.Values{
-			"code":          optionalvalues.Single(input.Code),
-			"client_id":     optionalvalues.Single(o.client.credentials.ClientID),
-			"client_secret": optionalvalues.Single(o.client.credentials.ClientSecret),
-			"redirect_uri":  optionalvalues.Single(o.client.credentials.RedirectURI),
-			"grant_type":    optionalvalues.Single(input.GrantType),
-			"code_verifier": optionalvalues.Single(input.CodeVerifier),
+		body: urloptional.Values{
+			"code":          urloptional.Single(input.Code),
+			"client_id":     urloptional.Single(o.client.credentials.ClientID),
+			"client_secret": urloptional.Single(o.client.credentials.ClientSecret),
+			"redirect_uri":  urloptional.Single(o.client.credentials.RedirectURI),
+			"grant_type":    urloptional.Single(input.GrantType),
+			"code_verifier": urloptional.Single(input.CodeVerifier),
 		},
 	})
 
@@ -99,11 +99,11 @@ func (o OAuth) RefreshToken(ctx context.Context, input RefreshTokenInput) (Respo
 	authRequest := newAuthRequest[AccessToken](ctx, o.client, requestOptions{
 		resource: resource,
 		method:   http.MethodPost,
-		body: optionalvalues.Values{
-			"refresh_token": optionalvalues.Single(input.RefreshToken),
-			"client_id":     optionalvalues.Single(o.client.credentials.ClientID),
-			"client_secret": optionalvalues.Single(o.client.credentials.ClientSecret),
-			"grant_type":    optionalvalues.Single(input.GrantType),
+		body: urloptional.Values{
+			"refresh_token": urloptional.Single(input.RefreshToken),
+			"client_id":     urloptional.Single(o.client.credentials.ClientID),
+			"client_secret": urloptional.Single(o.client.credentials.ClientSecret),
+			"grant_type":    urloptional.Single(input.GrantType),
 		},
 	})
 
@@ -124,9 +124,9 @@ func (o OAuth) RevokeToken(ctx context.Context, input RevokeTokenInput) (Respons
 	authRequest := newAuthRequest[EmptyResponse](ctx, o.client, requestOptions{
 		resource: resource,
 		method:   http.MethodPost,
-		body: optionalvalues.Values{
-			"token":           optionalvalues.Single(input.Token),
-			"token_hint_type": optionalvalues.Single(input.TokenHintType),
+		body: urloptional.Values{
+			"token":           urloptional.Single(input.Token),
+			"token_hint_type": urloptional.Single(input.TokenHintType),
 		},
 	})
 

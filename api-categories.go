@@ -3,7 +3,7 @@ package kickkit
 import (
 	"context"
 	"fmt"
-	optionalvalues "github.com/glichtv/kick-kit/internal/optional-values"
+	urloptional "github.com/glichtv/kick-kit/internal/url-optional"
 	"net/http"
 )
 
@@ -38,8 +38,8 @@ func (c Categories) Search(ctx context.Context, input SearchCategoriesInput) (Re
 			resource: resource,
 			method:   http.MethodGet,
 			authType: AuthTypeUserToken,
-			urlValues: optionalvalues.Values{
-				"q": optionalvalues.Single(input.Query),
+			urlValues: urloptional.Values{
+				"q": urloptional.Single(input.Query),
 			},
 		},
 	)

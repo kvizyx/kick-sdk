@@ -1,4 +1,4 @@
-package urlext
+package urloptional
 
 import (
 	"github.com/glichtv/kick-kit/optional"
@@ -35,10 +35,10 @@ func Join(values []string, separator string) Value {
 	}
 }
 
-func (ov Values) Encode() string {
-	values := make(url.Values, len(ov))
+func (v Values) Encode() string {
+	values := make(url.Values, len(v))
 
-	for key, candidates := range ov {
+	for key, candidates := range v {
 		for _, candidate := range candidates {
 			value, set := candidate.Value()
 			if !set {

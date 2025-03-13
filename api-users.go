@@ -2,7 +2,7 @@ package kickkit
 
 import (
 	"context"
-	optionalvalues "github.com/glichtv/kick-kit/internal/optional-values"
+	urloptional "github.com/glichtv/kick-kit/internal/url-optional"
 	"net/http"
 	"strconv"
 )
@@ -73,8 +73,8 @@ func (u Users) ByIDs(ctx context.Context, input GetUsersByIDsInput) (Response[[]
 			resource: resource,
 			method:   http.MethodGet,
 			authType: AuthTypeUserToken,
-			urlValues: optionalvalues.Values{
-				"id": optionalvalues.Many(usersIDs),
+			urlValues: urloptional.Values{
+				"id": urloptional.Many(usersIDs),
 			},
 		},
 	)

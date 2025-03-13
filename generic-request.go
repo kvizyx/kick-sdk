@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	optionalvalues "github.com/glichtv/kick-kit/internal/optional-values"
+	urloptional "github.com/glichtv/kick-kit/internal/url-optional"
 	"io"
 	"net/http"
 )
@@ -29,7 +29,7 @@ type (
 		resource  string
 		method    string
 		authType  AuthorizationType
-		urlValues optionalvalues.Values
+		urlValues urloptional.Values
 		body      any
 	}
 )
@@ -90,23 +90,35 @@ func (r request[Output]) execute() (Response[Output], error) {
 		_ = response.Body.Close()
 	}()
 
-	return r.parse(response)
+	return r.parseResponse(response)
 }
 
-func (r request[Output]) parse(response *http.Response) (Response[Output], error) {
+func (r request[Output]) parseResponse(response *http.Response) (Response[Output], error) {
 	metadata := ResponseMetadata{
 		StatusCode: response.StatusCode,
 		Header:     response.Header,
 	}
 
 	if response.StatusCode == http.StatusNoContent {
-		return Response[Output]{
-			ResponseMetadata: metadata,
-		}, nil
+		return Response[Output]{ResponseMetadata: metadata}, nil
 	}
 
 	switch r.target {
 	case requestTargetAPI:
+		// For some reason, Kick responds to unsuccessful requests with an object in the data field on endpoints where it
+		// should be an array or null, so we need to manually set empty output to avoid parsing error.
+		if response.StatusCode > http.StatusPermanentRedirect {
+			var output apiResponse[EmptyResponse]
+
+			if err := json.NewDecoder(response.Body).Decode(&output); err != nil {
+				return Response[Output]{}, fmt.Errorf("decode response body: %w", err)
+			}
+
+			metadata.KickMessage = output.Message
+
+			return Response[Output]{ResponseMetadata: metadata}, nil
+		}
+
 		var output apiResponse[Output]
 
 		if err := json.NewDecoder(response.Body).Decode(&output); err != nil {
@@ -121,7 +133,7 @@ func (r request[Output]) parse(response *http.Response) (Response[Output], error
 		}, nil
 	case requestTargetAuth:
 		if response.StatusCode != http.StatusOK {
-			var errorOutput errorResponse
+			var errorOutput authErrorResponse
 
 			if err := json.NewDecoder(response.Body).Decode(&errorOutput); err != nil {
 				return Response[Output]{}, fmt.Errorf("decode error response body: %w", err)
@@ -130,9 +142,7 @@ func (r request[Output]) parse(response *http.Response) (Response[Output], error
 			metadata.KickError = errorOutput.Error
 			metadata.KickErrorDescription = errorOutput.ErrorDescription
 
-			return Response[Output]{
-				ResponseMetadata: metadata,
-			}, nil
+			return Response[Output]{ResponseMetadata: metadata}, nil
 		}
 
 		var output Output
@@ -152,7 +162,7 @@ func (r request[Output]) parse(response *http.Response) (Response[Output], error
 
 // setRequestBody defines a body type and sets it to a request with an appropriate content type header.
 func setRequestBody(request *http.Request, body any) error {
-	if urlValues, isForm := body.(optionalvalues.Values); isForm {
+	if urlValues, isForm := body.(urloptional.Values); isForm {
 		buffer := bytes.NewBuffer([]byte(urlValues.Encode()))
 
 		request.Body = io.NopCloser(buffer)
