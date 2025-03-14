@@ -4,12 +4,15 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 
 	"github.com/glichtv/kick-sdk/internal/urloptional"
 )
+
+var ErrUnknownResourceType = errors.New("unknown resource type")
 
 type (
 	Request[Output any] struct {
@@ -71,7 +74,7 @@ func (r Request[Output]) Build() (*http.Request, error) {
 
 	if r.options.Body != nil {
 		if err = setRequestBody(request, r.options.Body); err != nil {
-			return nil, fmt.Errorf("set request Body: %w", err)
+			return nil, fmt.Errorf("set request body: %w", err)
 		}
 	}
 
@@ -85,9 +88,7 @@ func parseResponse[Output any](response *http.Response, resource ResourceType) (
 	}
 
 	if response.StatusCode == http.StatusNoContent {
-		return Response[Output]{
-			ResponseMetadata: metadata,
-		}, nil
+		return Response[Output]{ResponseMetadata: metadata}, nil
 	}
 
 	switch resource {
@@ -97,7 +98,9 @@ func parseResponse[Output any](response *http.Response, resource ResourceType) (
 		return parseIDResponse[Output](response, metadata)
 	}
 
-	return Response[Output]{}, nil
+	return Response[Output]{
+		ResponseMetadata: metadata,
+	}, ErrUnknownResourceType
 }
 
 func parseAPIResponse[Output any](response *http.Response, meta ResponseMetadata) (Response[Output], error) {
@@ -107,7 +110,7 @@ func parseAPIResponse[Output any](response *http.Response, meta ResponseMetadata
 		var output apiResponse[EmptyResponse]
 
 		if err := json.NewDecoder(response.Body).Decode(&output); err != nil {
-			return Response[Output]{}, fmt.Errorf("decode response Body: %w", err)
+			return Response[Output]{ResponseMetadata: meta}, fmt.Errorf("decode response body: %w", err)
 		}
 
 		meta.KickMessage = output.Message
@@ -120,7 +123,9 @@ func parseAPIResponse[Output any](response *http.Response, meta ResponseMetadata
 	var output apiResponse[Output]
 
 	if err := json.NewDecoder(response.Body).Decode(&output); err != nil {
-		return Response[Output]{}, fmt.Errorf("decode response Body: %w", err)
+		return Response[Output]{
+			ResponseMetadata: meta,
+		}, fmt.Errorf("decode response body: %w", err)
 	}
 
 	meta.KickMessage = output.Message
@@ -136,21 +141,23 @@ func parseIDResponse[Output any](response *http.Response, meta ResponseMetadata)
 		var errorOutput authErrorResponse
 
 		if err := json.NewDecoder(response.Body).Decode(&errorOutput); err != nil {
-			return Response[Output]{}, fmt.Errorf("decode error response Body: %w", err)
+			return Response[Output]{
+				ResponseMetadata: meta,
+			}, fmt.Errorf("decode response body: %w", err)
 		}
 
 		meta.KickError = errorOutput.Error
 		meta.KickErrorDescription = errorOutput.ErrorDescription
 
-		return Response[Output]{
-			ResponseMetadata: meta,
-		}, nil
+		return Response[Output]{ResponseMetadata: meta}, nil
 	}
 
 	var output Output
 
 	if err := json.NewDecoder(response.Body).Decode(&output); err != nil {
-		return Response[Output]{}, fmt.Errorf("decode response Body: %w", err)
+		return Response[Output]{
+			ResponseMetadata: meta,
+		}, fmt.Errorf("decode response body: %w", err)
 	}
 
 	return Response[Output]{
@@ -159,7 +166,7 @@ func parseIDResponse[Output any](response *http.Response, meta ResponseMetadata)
 	}, nil
 }
 
-// setRequestBody defines a Body type and sets it to a Request with an appropriate content type header.
+// setRequestBody defines a body type and sets it to a Request with an appropriate content type header.
 func setRequestBody(request *http.Request, body any) error {
 	if urlValues, isURLValues := body.(urloptional.Values); isURLValues {
 		bodyBuffer := bytes.NewBuffer([]byte(urlValues.Encode()))
@@ -172,7 +179,7 @@ func setRequestBody(request *http.Request, body any) error {
 
 	bodyBytes, err := json.Marshal(body)
 	if err != nil {
-		return fmt.Errorf("marshal request Body: %w", err)
+		return fmt.Errorf("marshal request body: %w", err)
 	}
 
 	bodyBuffer := bytes.NewBuffer(bodyBytes)

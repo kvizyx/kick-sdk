@@ -1,5 +1,9 @@
 package kicksdk
 
+// OAuthScope is a scope that enable an app to request a level of access to Kick and define
+// the specific actions an application can perform.
+//
+// Reference: https://docs.kick.com/getting-started/scopes
 type OAuthScope string
 
 const (
@@ -11,6 +15,8 @@ const (
 	ScopeEventsSubscribe OAuthScope = "events:subscribe"
 )
 
+// AuthorizationType is a type of authorization (token) that will be used to authorize
+// requests to the Kick's APIs.
 type AuthorizationType int
 
 const (

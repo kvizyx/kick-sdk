@@ -6,7 +6,7 @@ import "net/url"
 type ResourceType int
 
 const (
-	ResourceTypeAPI ResourceType = iota
+	ResourceTypeAPI ResourceType = iota + 1
 	ResourceTypeID
 )
 
@@ -15,7 +15,7 @@ type Resource struct {
 	Path string
 }
 
-// URL returns full path to resource based on its Type and Path.
+// URL builds full path to resource based on its Type and Path.
 func (r Resource) URL() string {
 	var base string
 

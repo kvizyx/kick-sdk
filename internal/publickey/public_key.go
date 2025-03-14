@@ -17,7 +17,7 @@ var (
 	ErrUnexpectedType = errors.New("unexpected public key type")
 )
 
-// Parse ...
+// Parse parses an RSA public key from a PEM payload.
 func Parse(payload []byte) (rsa.PublicKey, error) {
 	block, _ := pem.Decode(payload)
 	if block == nil {
@@ -28,12 +28,12 @@ func Parse(payload []byte) (rsa.PublicKey, error) {
 		return rsa.PublicKey{}, ErrNotPublicKey
 	}
 
-	parsed, err := x509.ParsePKIXPublicKey(block.Bytes)
+	parsedPublicKey, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
 		return rsa.PublicKey{}, fmt.Errorf("parse PKI public key: %w", err)
 	}
 
-	publicKey, ok := parsed.(*rsa.PublicKey)
+	publicKey, ok := parsedPublicKey.(*rsa.PublicKey)
 	if !ok {
 		return rsa.PublicKey{}, ErrUnexpectedType
 	}
@@ -41,7 +41,7 @@ func Parse(payload []byte) (rsa.PublicKey, error) {
 	return *publicKey, nil
 }
 
-// VerifyEventSignature ...
+// VerifyEventSignature verifies that the signature is valid for the provided public key and event body.
 func VerifyEventSignature(publicKey *rsa.PublicKey, body []byte, signature []byte) error {
 	decoded := make([]byte, base64.StdEncoding.DecodedLen(len(signature)))
 
