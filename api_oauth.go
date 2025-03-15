@@ -36,10 +36,7 @@ type AuthorizationURLInput struct {
 //
 // Reference: https://docs.kick.com/getting-started/generating-tokens-oauth2-flow#authorization-endpoint
 func (o OAuth) AuthorizationURL(input AuthorizationURLInput) string {
-	resource := Resource{
-		Type: ResourceTypeID,
-		Path: "oauth/authorize",
-	}
+	resource := o.client.NewResource(ResourceTypeID, "oauth/authorize")
 
 	scopes := make([]string, len(input.Scopes))
 
@@ -71,10 +68,7 @@ type ExchangeCodeInput struct {
 //
 // Reference: https://docs.kick.com/getting-started/generating-tokens-oauth2-flow#token-endpoint
 func (o OAuth) ExchangeCode(ctx context.Context, input ExchangeCodeInput) (Response[AccessToken], error) {
-	resource := Resource{
-		Type: ResourceTypeID,
-		Path: "oauth/token",
-	}
+	resource := o.client.NewResource(ResourceTypeID, "oauth/token")
 
 	request := NewRequest[AccessToken](ctx, o.client, RequestOptions{
 		Resource: resource,
@@ -101,10 +95,7 @@ type RefreshTokenInput struct {
 //
 // Reference: https://docs.kick.com/getting-started/generating-tokens-oauth2-flow#refresh-token-endpoint
 func (o OAuth) RefreshToken(ctx context.Context, input RefreshTokenInput) (Response[AccessToken], error) {
-	resource := Resource{
-		Type: ResourceTypeID,
-		Path: "oauth/token",
-	}
+	resource := o.client.NewResource(ResourceTypeID, "oauth/token")
 
 	request := NewRequest[AccessToken](ctx, o.client, RequestOptions{
 		Resource: resource,
@@ -129,10 +120,7 @@ type RevokeTokenInput struct {
 //
 // Reference: https://docs.kick.com/getting-started/generating-tokens-oauth2-flow#revoke-token-endpoint
 func (o OAuth) RevokeToken(ctx context.Context, input RevokeTokenInput) (Response[EmptyResponse], error) {
-	resource := Resource{
-		Type: ResourceTypeID,
-		Path: "oauth/revoke",
-	}
+	resource := o.client.NewResource(ResourceTypeID, "oauth/revoke")
 
 	request := NewRequest[EmptyResponse](ctx, o.client, RequestOptions{
 		Resource: resource,

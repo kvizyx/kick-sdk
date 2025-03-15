@@ -36,10 +36,7 @@ func (c *Client) Users() Users {
 //
 // Reference: https://docs.kick.com/apis/users#token-introspect
 func (u Users) InspectToken(ctx context.Context) (Response[TokenInfo], error) {
-	resource := Resource{
-		Type: ResourceTypeAPI,
-		Path: "public/v1/token/introspect",
-	}
+	resource := u.client.NewResource(ResourceTypeAPI, "public/v1/token/introspect")
 
 	request := NewRequest[TokenInfo](
 		ctx,
@@ -62,10 +59,7 @@ type GetUsersByIDsInput struct {
 //
 // Reference: https://docs.kick.com/apis/users#users
 func (u Users) GetByIDs(ctx context.Context, input GetUsersByIDsInput) (Response[[]User], error) {
-	resource := Resource{
-		Type: ResourceTypeAPI,
-		Path: "public/v1/token/users",
-	}
+	resource := u.client.NewResource(ResourceTypeAPI, "public/v1/users")
 
 	usersIDs := make([]string, len(input.UsersIDs))
 

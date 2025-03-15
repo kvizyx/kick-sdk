@@ -36,10 +36,7 @@ func (c *Client) Events() Events {
 //
 // Reference: https://docs.kick.com/events/subscribe-to-events#events-subscriptions
 func (e Events) GetSubscriptions(ctx context.Context) (Response[[]EventSubscription], error) {
-	resource := Resource{
-		Type: ResourceTypeAPI,
-		Path: "public/v1/events/subscriptions",
-	}
+	resource := e.client.NewResource(ResourceTypeAPI, "public/v1/events/subscriptions")
 
 	request := NewRequest[[]EventSubscription](
 		ctx,
@@ -77,10 +74,7 @@ type (
 //
 // Reference: https://docs.kick.com/events/subscribe-to-events#events-subscriptions-1
 func (e Events) Subscribe(ctx context.Context, input SubscribeEventsInput) (Response[[]SubscribeEventsOutput], error) {
-	resource := Resource{
-		Type: ResourceTypeAPI,
-		Path: "public/v1/events/subscriptions",
-	}
+	resource := e.client.NewResource(ResourceTypeAPI, "public/v1/events/subscriptions")
 
 	request := NewRequest[[]SubscribeEventsOutput](
 		ctx,
@@ -104,10 +98,7 @@ type UnsubscribeEventsInput struct {
 //
 // Reference: https://docs.kick.com/events/subscribe-to-events#events-subscriptions-2
 func (e Events) Unsubscribe(ctx context.Context, input UnsubscribeEventsInput) (Response[EmptyResponse], error) {
-	resource := Resource{
-		Type: ResourceTypeAPI,
-		Path: "public/v1/events/subscriptions",
-	}
+	resource := e.client.NewResource(ResourceTypeAPI, "public/v1/events/subscriptions")
 
 	request := NewRequest[EmptyResponse](
 		ctx,

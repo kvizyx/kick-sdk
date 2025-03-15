@@ -19,3 +19,20 @@ func WithAccessTokens(tokens AccessTokens) ClientOption {
 		client.tokens = tokens
 	}
 }
+
+type BaseURLs struct {
+	IDBaseURL  string
+	APIBaseURL string
+}
+
+func WithBaseURLs(urls BaseURLs) ClientOption {
+	return func(client *Client) {
+		if len(urls.IDBaseURL) != 0 {
+			client.baseURLs.IDBaseURL = urls.IDBaseURL
+		}
+
+		if len(urls.APIBaseURL) != 0 {
+			client.baseURLs.APIBaseURL = urls.APIBaseURL
+		}
+	}
+}

@@ -11,21 +11,34 @@ const (
 )
 
 type Resource struct {
+	// Type is a type of resource.
 	Type ResourceType
+	// Path is a path to resource on server.
 	Path string
+
+	// base is a base path (host and port) of resource.
+	base string
 }
 
-// URL builds full path to resource based on its Type and Path.
-func (r Resource) URL() string {
+func (c *Client) NewResource(resource ResourceType, path string) Resource {
 	var base string
 
-	switch r.Type {
+	switch resource {
 	case ResourceTypeAPI:
-		base = APIBaseURL
+		base = c.baseURLs.APIBaseURL
 	case ResourceTypeID:
-		base = IDBaseURL
+		base = c.baseURLs.IDBaseURL
 	}
 
-	resourceURL, _ := url.JoinPath(base, r.Path)
+	return Resource{
+		Type: resource,
+		Path: path,
+		base: base,
+	}
+}
+
+// URL joins resource's paths to single usable URL.
+func (r Resource) URL() string {
+	resourceURL, _ := url.JoinPath(r.base, r.Path)
 	return resourceURL
 }

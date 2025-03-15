@@ -5,12 +5,13 @@ import (
 )
 
 const (
-	APIBaseURL = "https://api.kick.com"
 	IDBaseURL  = "https://id.kick.com"
+	APIBaseURL = "https://api.kick.com"
 )
 
 type Client struct {
 	httpClient HTTPClient
+	baseURLs   BaseURLs
 
 	tokens      AccessTokens
 	credentials Credentials
@@ -19,6 +20,10 @@ type Client struct {
 func NewClient(options ...ClientOption) *Client {
 	client := &Client{
 		httpClient: http.DefaultClient,
+		baseURLs: BaseURLs{
+			IDBaseURL:  IDBaseURL,
+			APIBaseURL: APIBaseURL,
+		},
 	}
 
 	for _, option := range options {
@@ -26,6 +31,10 @@ func NewClient(options ...ClientOption) *Client {
 	}
 
 	return client
+}
+
+func (c *Client) BaseURLs() BaseURLs {
+	return c.baseURLs
 }
 
 func (c *Client) Credentials() Credentials {

@@ -46,10 +46,7 @@ type GetChannelsInput struct {
 //
 // Reference: https://docs.kick.com/apis/channels#channels
 func (c Channels) GetByBroadcasterID(ctx context.Context, input GetChannelsInput) (Response[[]Channel], error) {
-	resource := Resource{
-		Type: ResourceTypeAPI,
-		Path: "public/v1/channels",
-	}
+	resource := c.client.NewResource(ResourceTypeAPI, "public/v1/channels")
 
 	broadcasterIDs := make([]string, len(input.BroadcasterUserIDs))
 
@@ -82,10 +79,7 @@ type UpdateStreamInput struct {
 //
 // Reference: https://docs.kick.com/apis/channels#channels-1
 func (c Channels) UpdateStream(ctx context.Context, input UpdateStreamInput) (Response[EmptyResponse], error) {
-	resource := Resource{
-		Type: ResourceTypeAPI,
-		Path: "public/v1/channels",
-	}
+	resource := c.client.NewResource(ResourceTypeAPI, "public/v1/channels")
 
 	request := NewRequest[EmptyResponse](
 		ctx,

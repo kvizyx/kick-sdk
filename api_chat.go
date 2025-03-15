@@ -40,10 +40,7 @@ type (
 //
 // Reference: https://docs.kick.com/apis/chat#chat
 func (c Chat) PostMessage(ctx context.Context, input PostChatMessageInput) (Response[PostChatMessageOutput], error) {
-	resource := Resource{
-		Type: ResourceTypeAPI,
-		Path: "public/v1/chat",
-	}
+	resource := c.client.NewResource(ResourceTypeAPI, "public/v1/chat")
 
 	// When sending as a user, the broadcaster user ID is required.
 	if input.PosterType == MessagePosterUser && input.BroadcasterUserID <= 0 {

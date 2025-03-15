@@ -30,10 +30,7 @@ type SearchCategoriesInput struct {
 //
 // Reference: https://docs.kick.com/apis/categories#categories
 func (c Categories) Search(ctx context.Context, input SearchCategoriesInput) (Response[[]Category], error) {
-	resource := Resource{
-		Type: ResourceTypeAPI,
-		Path: "public/v1/categories",
-	}
+	resource := c.client.NewResource(ResourceTypeAPI, "public/v1/categories")
 
 	request := NewRequest[[]Category](
 		ctx,
@@ -59,10 +56,10 @@ type GetCategoryByIDInput struct {
 //
 // Reference: https://docs.kick.com/apis/categories#categories-category_id
 func (c Categories) GetByID(ctx context.Context, input GetCategoryByIDInput) (Response[Category], error) {
-	resource := Resource{
-		Type: ResourceTypeAPI,
-		Path: fmt.Sprintf("%s/%d", "public/v1/categories", input.CategoryID),
-	}
+	resource := c.client.NewResource(
+		ResourceTypeAPI,
+		fmt.Sprintf("%s/%d", "public/v1/categories", input.CategoryID),
+	)
 
 	request := NewRequest[Category](
 		ctx,
