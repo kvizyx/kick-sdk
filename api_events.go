@@ -2,6 +2,7 @@ package kicksdk
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/glichtv/kick-sdk/internal/urloptional"
@@ -23,6 +24,8 @@ type EventSubscriptionMethod string
 const (
 	EventSubscriptionWebhook EventSubscriptionMethod = "webhook"
 )
+
+var ErrNoEventsIDs = errors.New("events IDs are not passed but required")
 
 type Events struct {
 	client *Client
@@ -59,7 +62,7 @@ type (
 
 	SubscribeEventsInput struct {
 		Events []EventInput            `json:"events"`
-		Method EventSubscriptionMethod `json:"Method,omitempty"`
+		Method EventSubscriptionMethod `json:"method,omitempty"`
 	}
 
 	SubscribeEventsOutput struct {
@@ -99,6 +102,10 @@ type UnsubscribeEventsInput struct {
 // Reference: https://docs.kick.com/events/subscribe-to-events#events-subscriptions-2
 func (e Events) Unsubscribe(ctx context.Context, input UnsubscribeEventsInput) (Response[EmptyResponse], error) {
 	resource := e.client.NewResource(ResourceTypeAPI, "public/v1/events/subscriptions")
+
+	if len(input.EventsIDs) == 0 {
+		return Response[EmptyResponse]{}, ErrNoEventsIDs
+	}
 
 	request := NewRequest[EmptyResponse](
 		ctx,

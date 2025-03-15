@@ -18,6 +18,10 @@ func Single(value string) Value {
 	}
 }
 
+func SingleOptional(value optional.Optional[string]) Value {
+	return Value{value}
+}
+
 func Many(values []string) Value {
 	origin := make(Value, len(values))
 

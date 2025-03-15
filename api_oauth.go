@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/glichtv/kick-sdk/internal/urloptional"
+	"github.com/glichtv/kick-sdk/optional"
 )
 
 type AccessToken struct {
@@ -113,7 +114,7 @@ func (o OAuth) RefreshToken(ctx context.Context, input RefreshTokenInput) (Respo
 
 type RevokeTokenInput struct {
 	Token         string
-	TokenHintType string
+	TokenHintType optional.Optional[string]
 }
 
 // RevokeToken revokes access to the token.
@@ -127,7 +128,7 @@ func (o OAuth) RevokeToken(ctx context.Context, input RevokeTokenInput) (Respons
 		Method:   http.MethodPost,
 		Body: urloptional.Values{
 			"token":           urloptional.Single(input.Token),
-			"token_hint_type": urloptional.Single(input.TokenHintType),
+			"token_hint_type": urloptional.SingleOptional(input.TokenHintType),
 		},
 	})
 

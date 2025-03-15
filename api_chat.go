@@ -31,8 +31,8 @@ type (
 	}
 
 	PostChatMessageOutput struct {
-		MessageID string `json:"message_id"`
-		IsSent    bool   `json:"is_sent"`
+		MessageID string `json:"message_id,omitempty"`
+		IsSent    bool   `json:"is_sent,omitempty"`
 	}
 )
 
