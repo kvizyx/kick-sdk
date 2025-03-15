@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/glichtv/kick-sdk/internal/urloptional"
+	"github.com/glichtv/kick-sdk/optional"
 )
 
 type EventSubscription struct {
@@ -19,7 +20,7 @@ type EventSubscription struct {
 	CreatedAt         string `json:"created_at"`
 }
 
-type EventSubscriptionMethod string
+type EventSubscriptionMethod = string
 
 const (
 	EventSubscriptionWebhook EventSubscriptionMethod = "webhook"
@@ -61,8 +62,8 @@ type (
 	}
 
 	SubscribeEventsInput struct {
-		Events []EventInput            `json:"events"`
-		Method EventSubscriptionMethod `json:"method,omitempty"`
+		Events []EventInput                               `json:"events"`
+		Method optional.Optional[EventSubscriptionMethod] `json:"method,omitempty"`
 	}
 
 	SubscribeEventsOutput struct {

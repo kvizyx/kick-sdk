@@ -17,6 +17,13 @@ type AccessToken struct {
 	Scope        string `json:"scope"`
 }
 
+type TokenHintType = string
+
+const (
+	TokenHintAccessToken  TokenHintType = "access_token"
+	TokenHintRefreshToken TokenHintType = "refresh_token"
+)
+
 type OAuthResource struct {
 	client *Client
 }
@@ -114,7 +121,7 @@ func (o OAuthResource) RefreshToken(ctx context.Context, input RefreshTokenInput
 
 type RevokeTokenInput struct {
 	Token         string
-	TokenHintType optional.Optional[string]
+	TokenHintType optional.Optional[TokenHintType]
 }
 
 // RevokeToken revokes access to the token.

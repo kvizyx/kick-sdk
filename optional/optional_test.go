@@ -1,6 +1,7 @@
 package optional
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -94,4 +95,97 @@ func TestOptional_IsSet(t *testing.T) {
 
 	assert.Equal(t, true, valueSet.IsSet())
 	assert.Equal(t, false, valueUnset.IsSet())
+}
+
+func TestOptional_MarshalJSON(t *testing.T) {
+	stub := "test"
+
+	tests := []struct {
+		name         string
+		input        any
+		expectedJSON string
+	}{
+		{
+			name:         "Test",
+			input:        struct{ Value Optional[string] }{Value: From("test")},
+			expectedJSON: `{"Value": "test"}`,
+		},
+		{
+			name:         "Test pointer",
+			input:        struct{ Value Optional[*string] }{Value: From(&stub)},
+			expectedJSON: `{"Value": "test"}`,
+		},
+		{
+			name:         "Optional integer",
+			input:        struct{ Value Optional[int] }{},
+			expectedJSON: `{"Value": null}`,
+		},
+		{
+			name:         "Optional optional",
+			input:        struct{ Value Optional[Optional[uint64]] }{Value: From(From(uint64(1)))},
+			expectedJSON: `{"Value": 1}`,
+		},
+		{
+			name: "Optional struct",
+			input: struct {
+				Value Optional[struct{ Inner string }]
+			}{
+				Value: From(struct{ Inner string }{}),
+			},
+			expectedJSON: `{"Value": {"Inner": ""}}`,
+		},
+		{
+			name: "Optional omitted struct",
+			input: struct {
+				Value Optional[struct{ Inner string }]
+			}{},
+			expectedJSON: `{"Value": null}`,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			data, err := json.Marshal(test.input)
+			assert.NoError(t, err)
+			assert.JSONEq(t, test.expectedJSON, string(data))
+		})
+	}
+}
+
+func TestOptional_UnmarshalJSON(t *testing.T) {
+	var values struct {
+		String        Optional[string]
+		OmittedString Optional[string]
+		StringPointer Optional[*string]
+		NullInt       Optional[int]
+	}
+
+	err := json.Unmarshal([]byte(`
+	{
+		"String": "test",
+		"StringPointer": "test pointer",
+		"NullInt": null
+	}`), &values)
+	assert.NoError(t, err)
+
+	strValue, _ := values.String.Value()
+	assert.Equal(t, "test", strValue)
+
+	assert.True(t, values.String.IsSet())
+	assert.False(t, values.OmittedString.IsSet())
+	assert.True(t, values.StringPointer.IsSet())
+
+	var (
+		ptrValue, _    = values.StringPointer.Value()
+		strPtrValue, _ = values.StringPointer.Value()
+	)
+
+	if assert.NotNil(t, ptrValue) {
+		assert.EqualValues(t, "test pointer", *strPtrValue)
+	}
+
+	assert.True(t, values.NullInt.IsSet())
+
+	nullInt, _ := values.NullInt.Value()
+	assert.Zero(t, nullInt)
 }

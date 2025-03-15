@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/glichtv/kick-sdk/internal/urloptional"
+	"github.com/glichtv/kick-sdk/optional"
 )
 
 type (
@@ -74,8 +75,8 @@ func (c ChannelsResource) GetByBroadcasterIDs(
 }
 
 type UpdateStreamInput struct {
-	CategoryID  int    `json:"category_id,omitempty"`
-	StreamTitle string `json:"stream_title,omitempty"`
+	CategoryID  optional.Optional[int]    `json:"category_id,omitempty"`
+	StreamTitle optional.Optional[string] `json:"stream_title,omitempty"`
 }
 
 // UpdateStream updates Stream metadata for a Channel based on the channel ID.
