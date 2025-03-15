@@ -42,10 +42,10 @@ type GetChannelsInput struct {
 	BroadcasterUserIDs []int
 }
 
-// GetByBroadcasterID retrieves Channel information based on provided broadcaster IDs.
+// GetByBroadcasterIDs retrieves Channel information based on provided broadcaster IDs.
 //
 // Reference: https://docs.kick.com/apis/channels#channels
-func (c Channels) GetByBroadcasterID(ctx context.Context, input GetChannelsInput) (Response[[]Channel], error) {
+func (c Channels) GetByBroadcasterIDs(ctx context.Context, input GetChannelsInput) (Response[[]Channel], error) {
 	resource := c.client.NewResource(ResourceTypeAPI, "public/v1/channels")
 
 	broadcasterIDs := make([]string, len(input.BroadcasterUserIDs))
