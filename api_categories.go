@@ -9,27 +9,27 @@ import (
 )
 
 type Category struct {
-	ID        int    `json:"id"`
-	Name      string `json:"name"`
-	Thumbnail string `json:"thumbnail"`
+	ID        int    `json:"id,omitempty"`
+	Name      string `json:"name,omitempty"`
+	Thumbnail string `json:"thumbnail,omitempty"`
 }
 
-type Categories struct {
+type CategoriesResource struct {
 	client *Client
 }
 
-func (c *Client) Categories() Categories {
-	return Categories{client: c}
+func (c *Client) Categories() CategoriesResource {
+	return CategoriesResource{client: c}
 }
 
 type SearchCategoriesInput struct {
 	Query string
 }
 
-// Search searches for Categories based on the search input.
+// Search searches for CategoriesResource based on the search input.
 //
 // Reference: https://docs.kick.com/apis/categories#categories
-func (c Categories) Search(ctx context.Context, input SearchCategoriesInput) (Response[[]Category], error) {
+func (c CategoriesResource) Search(ctx context.Context, input SearchCategoriesInput) (Response[[]Category], error) {
 	resource := c.client.NewResource(ResourceTypeAPI, "public/v1/categories")
 
 	request := NewRequest[[]Category](
@@ -55,7 +55,7 @@ type GetCategoryByIDInput struct {
 // GetByID retrieves Category based on it's ID.
 //
 // Reference: https://docs.kick.com/apis/categories#categories-category_id
-func (c Categories) GetByID(ctx context.Context, input GetCategoryByIDInput) (Response[Category], error) {
+func (c CategoriesResource) GetByID(ctx context.Context, input GetCategoryByIDInput) (Response[Category], error) {
 	resource := c.client.NewResource(
 		ResourceTypeAPI,
 		fmt.Sprintf("%s/%d", "public/v1/categories", input.CategoryID),

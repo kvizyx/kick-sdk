@@ -24,18 +24,18 @@ type (
 	}
 )
 
-type Users struct {
+type UsersResource struct {
 	client *Client
 }
 
-func (c *Client) Users() Users {
-	return Users{client: c}
+func (c *Client) Users() UsersResource {
+	return UsersResource{client: c}
 }
 
 // InspectToken retrieves information about the token that is passed in via the authorization header.
 //
 // Reference: https://docs.kick.com/apis/users#token-introspect
-func (u Users) InspectToken(ctx context.Context) (Response[TokenInfo], error) {
+func (u UsersResource) InspectToken(ctx context.Context) (Response[TokenInfo], error) {
 	resource := u.client.NewResource(ResourceTypeAPI, "public/v1/token/introspect")
 
 	request := NewRequest[TokenInfo](
@@ -58,7 +58,7 @@ type GetUsersByIDsInput struct {
 // GetByIDs retrieves user information based on provided user IDs.
 //
 // Reference: https://docs.kick.com/apis/users#users
-func (u Users) GetByIDs(ctx context.Context, input GetUsersByIDsInput) (Response[[]User], error) {
+func (u UsersResource) GetByIDs(ctx context.Context, input GetUsersByIDsInput) (Response[[]User], error) {
 	resource := u.client.NewResource(ResourceTypeAPI, "public/v1/users")
 
 	usersIDs := make([]string, len(input.UsersIDs))

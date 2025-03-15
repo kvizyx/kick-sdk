@@ -24,9 +24,11 @@ type (
 	}
 
 	WebhookEventCallback[Payload any] func(WebhookEventHeader, Payload)
+	WebhookEventHandlerFunc           func(context.Context, WebhookEventHeader, []byte) error
 
 	WebhookEventsHandler struct {
-		tracker EventsTracker
+		tracker       EventsTracker
+		eventsHandler WebhookEventHandlerFunc
 
 		verify    bool
 		publicKey string
@@ -42,9 +44,12 @@ type (
 
 func NewWebhookEventsHandler(options ...EventsHandlerOption) *WebhookEventsHandler {
 	handler := &WebhookEventsHandler{
-		verify:    true,             // Events verification is enabled by default.
+		verify:    true,             // EventsResource verification is enabled by default.
 		publicKey: publickey.Static, // Static public key is a default public key.
 	}
+
+	// Default events handler can be overridden by options.
+	handler.eventsHandler = handler.handleEvent
 
 	for _, option := range options {
 		option(handler)
@@ -61,7 +66,7 @@ func (weh *WebhookEventsHandler) ServeHTTP(w http.ResponseWriter, request *http.
 
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
-		http.Error(w, "Cannot read Request Body", http.StatusInternalServerError)
+		http.Error(w, "Cannot read request body", http.StatusInternalServerError)
 		return
 	}
 	defer func() {
@@ -72,12 +77,12 @@ func (weh *WebhookEventsHandler) ServeHTTP(w http.ResponseWriter, request *http.
 
 	if weh.verify {
 		if err = VerifyWebhookEvent(header, weh.publicKey, body); err != nil {
-			http.Error(w, "Cannot verified event", http.StatusForbidden)
+			http.Error(w, "Cannot verify event", http.StatusForbidden)
 			return
 		}
 	}
 
-	if err = weh.handleEvent(request.Context(), header, body); err != nil {
+	if err = weh.eventsHandler(request.Context(), header, body); err != nil {
 		http.Error(w, "Cannot handle event", http.StatusInternalServerError)
 		return
 	}
@@ -102,7 +107,7 @@ func (weh *WebhookEventsHandler) handleEvent(ctx context.Context, header Webhook
 		var event EventChatMessage
 
 		if err := json.Unmarshal(body, &event); err != nil {
-			return fmt.Errorf("unmarshal event Body: %w", err)
+			return fmt.Errorf("unmarshal event body: %w", err)
 		}
 
 		if weh.OnChatMessage != nil {
@@ -112,7 +117,7 @@ func (weh *WebhookEventsHandler) handleEvent(ctx context.Context, header Webhook
 		var event EventChannelFollow
 
 		if err := json.Unmarshal(body, &event); err != nil {
-			return fmt.Errorf("unmarshal event Body: %w", err)
+			return fmt.Errorf("unmarshal event body: %w", err)
 		}
 
 		if weh.OnChannelFollow != nil {
@@ -122,7 +127,7 @@ func (weh *WebhookEventsHandler) handleEvent(ctx context.Context, header Webhook
 		var event EventChannelSubscriptionRenewal
 
 		if err := json.Unmarshal(body, &event); err != nil {
-			return fmt.Errorf("unmarshal event Body: %w", err)
+			return fmt.Errorf("unmarshal event body: %w", err)
 		}
 
 		if weh.OnChannelSubscriptionRenewal != nil {
@@ -132,7 +137,7 @@ func (weh *WebhookEventsHandler) handleEvent(ctx context.Context, header Webhook
 		var event EventChannelSubscriptionGifts
 
 		if err := json.Unmarshal(body, &event); err != nil {
-			return fmt.Errorf("unmarshal event Body: %w", err)
+			return fmt.Errorf("unmarshal event body: %w", err)
 		}
 
 		if weh.OnChannelSubscriptionGifts != nil {
@@ -142,7 +147,7 @@ func (weh *WebhookEventsHandler) handleEvent(ctx context.Context, header Webhook
 		var event EventChannelSubscriptionCreated
 
 		if err := json.Unmarshal(body, &event); err != nil {
-			return fmt.Errorf("unmarshal event Body: %w", err)
+			return fmt.Errorf("unmarshal event body: %w", err)
 		}
 
 		if weh.OnChannelSubscriptionCreated != nil {
@@ -152,7 +157,7 @@ func (weh *WebhookEventsHandler) handleEvent(ctx context.Context, header Webhook
 		var event EventLivestreamStatusUpdated
 
 		if err := json.Unmarshal(body, &event); err != nil {
-			return fmt.Errorf("unmarshal event Body: %w", err)
+			return fmt.Errorf("unmarshal event body: %w", err)
 		}
 
 		if weh.OnLivestreamStatusUpdated != nil {

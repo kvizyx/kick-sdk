@@ -17,12 +17,12 @@ type AccessToken struct {
 	Scope        string `json:"scope"`
 }
 
-type OAuth struct {
+type OAuthResource struct {
 	client *Client
 }
 
-func (c *Client) OAuth() OAuth {
-	return OAuth{client: c}
+func (c *Client) OAuth() OAuthResource {
+	return OAuthResource{client: c}
 }
 
 type AuthorizationURLInput struct {
@@ -36,7 +36,7 @@ type AuthorizationURLInput struct {
 // access Request.
 //
 // Reference: https://docs.kick.com/getting-started/generating-tokens-oauth2-flow#authorization-endpoint
-func (o OAuth) AuthorizationURL(input AuthorizationURLInput) string {
+func (o OAuthResource) AuthorizationURL(input AuthorizationURLInput) string {
 	resource := o.client.NewResource(ResourceTypeID, "oauth/authorize")
 
 	scopes := make([]string, len(input.Scopes))
@@ -68,7 +68,7 @@ type ExchangeCodeInput struct {
 // requests to the Kick API.
 //
 // Reference: https://docs.kick.com/getting-started/generating-tokens-oauth2-flow#token-endpoint
-func (o OAuth) ExchangeCode(ctx context.Context, input ExchangeCodeInput) (Response[AccessToken], error) {
+func (o OAuthResource) ExchangeCode(ctx context.Context, input ExchangeCodeInput) (Response[AccessToken], error) {
 	resource := o.client.NewResource(ResourceTypeID, "oauth/token")
 
 	request := NewRequest[AccessToken](ctx, o.client, RequestOptions{
@@ -95,7 +95,7 @@ type RefreshTokenInput struct {
 // RefreshToken refreshes both access and refresh tokens.
 //
 // Reference: https://docs.kick.com/getting-started/generating-tokens-oauth2-flow#refresh-token-endpoint
-func (o OAuth) RefreshToken(ctx context.Context, input RefreshTokenInput) (Response[AccessToken], error) {
+func (o OAuthResource) RefreshToken(ctx context.Context, input RefreshTokenInput) (Response[AccessToken], error) {
 	resource := o.client.NewResource(ResourceTypeID, "oauth/token")
 
 	request := NewRequest[AccessToken](ctx, o.client, RequestOptions{
@@ -120,7 +120,7 @@ type RevokeTokenInput struct {
 // RevokeToken revokes access to the token.
 //
 // Reference: https://docs.kick.com/getting-started/generating-tokens-oauth2-flow#revoke-token-endpoint
-func (o OAuth) RevokeToken(ctx context.Context, input RevokeTokenInput) (Response[EmptyResponse], error) {
+func (o OAuthResource) RevokeToken(ctx context.Context, input RevokeTokenInput) (Response[EmptyResponse], error) {
 	resource := o.client.NewResource(ResourceTypeID, "oauth/revoke")
 
 	request := NewRequest[EmptyResponse](ctx, o.client, RequestOptions{

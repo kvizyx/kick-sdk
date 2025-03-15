@@ -8,13 +8,19 @@ func WithEventsTracker(tracker EventsTracker) EventsHandlerOption {
 	}
 }
 
+func WithEventsHandler(eventsHandler WebhookEventHandlerFunc) EventsHandlerOption {
+	return func(handler *WebhookEventsHandler) {
+		handler.eventsHandler = eventsHandler
+	}
+}
+
 func WithDisabledEventsVerification() EventsHandlerOption {
 	return func(handler *WebhookEventsHandler) {
 		handler.verify = false
 	}
 }
 
-func WithCustomPublicKey(publicKey string) EventsHandlerOption {
+func WithPublicKey(publicKey string) EventsHandlerOption {
 	return func(handler *WebhookEventsHandler) {
 		handler.publicKey = publicKey
 	}

@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/glichtv/kick-sdk/internal/urloptional"
@@ -33,24 +32,12 @@ func TestRequest_Execute(t *testing.T) {
 	})
 
 	t.Run("Successful request execution", func(t *testing.T) {
-		server := httptest.NewServer(
-			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var (
+			client = newMockClient(t, func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("X-Test", "test")
 				w.WriteHeader(http.StatusOK)
-				_, _ = w.Write([]byte(`{"data": {"value": "test"}}`))
-			}),
-		)
-		t.Cleanup(func() {
-			server.Close()
-		})
-
-		var (
-			client = NewClient(
-				WithHTTPClient(server.Client()),
-				WithBaseURLs(BaseURLs{
-					APIBaseURL: server.URL,
-				}),
-			)
+				_, _ = w.Write([]byte(`{"data": {"value": "test"}, "message": "OK"}`))
+			})
 			request = Request[mockTestOutput]{
 				ctx:    context.Background(),
 				client: client,
@@ -67,6 +54,7 @@ func TestRequest_Execute(t *testing.T) {
 		assert.Equal(t, http.StatusOK, response.ResponseMetadata.StatusCode)
 		assert.Equal(t, "test", response.ResponseMetadata.Header.Get("X-Test"))
 		assert.Equal(t, "test", response.Data.Value)
+		assert.Equal(t, "OK", response.ResponseMetadata.KickMessage)
 	})
 
 	t.Run("Unsuccessful request execution", func(t *testing.T) {
@@ -252,7 +240,7 @@ func TestParseResponse(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, "test", result.Data.Value)
-		assert.Equal(t, result.ResponseMetadata.KickMessage, expectedMeta.KickMessage)
+		assert.Equal(t, expectedMeta.KickMessage, result.ResponseMetadata.KickMessage)
 		assertDefaultResponseMeta(t, result.ResponseMetadata, expectedMeta)
 	})
 
@@ -275,7 +263,7 @@ func TestParseResponse(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, "test", result.Data.Value)
-		assert.Equal(t, result.ResponseMetadata.KickMessage, expectedMeta.KickMessage)
+		assert.Equal(t, expectedMeta.KickMessage, result.ResponseMetadata.KickMessage)
 		assertDefaultResponseMeta(t, result.ResponseMetadata, expectedMeta)
 	})
 
@@ -328,7 +316,7 @@ func TestParseAPIResponse(t *testing.T) {
 
 		assert.Equal(t, result.Data, expectedOutput)
 
-		assert.Equal(t, result.ResponseMetadata.KickMessage, apiResp.Message)
+		assert.Equal(t, apiResp.Message, result.ResponseMetadata.KickMessage)
 		assertDefaultResponseMeta(t, result.ResponseMetadata, meta)
 	})
 
@@ -347,8 +335,8 @@ func TestParseAPIResponse(t *testing.T) {
 
 		assert.Contains(t, err.Error(), "decode response body")
 
-		assert.Equal(t, result.Data, mockTestOutput{})
-		assert.Equal(t, result.ResponseMetadata.KickMessage, "")
+		assert.Equal(t, mockTestOutput{}, result.Data)
+		assert.Equal(t, "", result.ResponseMetadata.KickMessage)
 		assertDefaultResponseMeta(t, result.ResponseMetadata, meta)
 	})
 
@@ -372,10 +360,10 @@ func TestParseAPIResponse(t *testing.T) {
 		result, err := parseAPIResponse[mockTestOutput](response, meta)
 		assert.NoError(t, err)
 
-		assert.Equal(t, result.Data, mockTestOutput{})
+		assert.Equal(t, mockTestOutput{}, result.Data)
 
-		assert.Equal(t, result.ResponseMetadata.KickMessage, apiResp.Message)
-		assertDefaultResponseMeta(t, result.ResponseMetadata, meta)
+		assert.Equal(t, apiResp.Message, result.ResponseMetadata.KickMessage)
+		assertDefaultResponseMeta(t, meta, result.ResponseMetadata)
 	})
 
 	t.Run("Unsuccessful response with invalid body", func(t *testing.T) {
@@ -393,8 +381,8 @@ func TestParseAPIResponse(t *testing.T) {
 
 		assert.Contains(t, err.Error(), "decode response body")
 
-		assert.Equal(t, result.Data, mockTestOutput{})
-		assert.Equal(t, result.ResponseMetadata.KickMessage, "")
+		assert.Equal(t, mockTestOutput{}, result.Data)
+		assert.Equal(t, "", result.ResponseMetadata.KickMessage)
 		assertDefaultResponseMeta(t, result.ResponseMetadata, meta)
 	})
 }
@@ -425,7 +413,7 @@ func TestParseIDResponse(t *testing.T) {
 		result, err := parseIDResponse[testOutput](response, meta)
 		assert.NoError(t, err)
 
-		assert.Equal(t, result.Data, expectedOutput)
+		assert.Equal(t, expectedOutput, result.Data)
 		assertDefaultResponseMeta(t, result.ResponseMetadata, meta)
 	})
 
@@ -444,7 +432,7 @@ func TestParseIDResponse(t *testing.T) {
 
 		assert.Contains(t, err.Error(), "decode response body")
 
-		assert.Equal(t, result.Data, testOutput{})
+		assert.Equal(t, testOutput{}, result.Data)
 		assertDefaultResponseMeta(t, result.ResponseMetadata, meta)
 	})
 
@@ -468,10 +456,10 @@ func TestParseIDResponse(t *testing.T) {
 		result, err := parseIDResponse[testOutput](response, meta)
 		assert.NoError(t, err)
 
-		assert.Equal(t, result.Data, testOutput{})
+		assert.Equal(t, testOutput{}, result.Data)
 
-		assert.Equal(t, result.ResponseMetadata.KickError, expectedError.Error)
-		assert.Equal(t, result.ResponseMetadata.KickErrorDescription, expectedError.ErrorDescription)
+		assert.Equal(t, expectedError.Error, result.ResponseMetadata.KickError)
+		assert.Equal(t, expectedError.ErrorDescription, result.ResponseMetadata.KickErrorDescription)
 		assertDefaultResponseMeta(t, result.ResponseMetadata, meta)
 	})
 
@@ -490,7 +478,7 @@ func TestParseIDResponse(t *testing.T) {
 
 		assert.Contains(t, err.Error(), "decode response body")
 
-		assert.Equal(t, result.Data, testOutput{})
+		assert.Equal(t, testOutput{}, result.Data)
 		assertDefaultResponseMeta(t, result.ResponseMetadata, meta)
 	})
 }
@@ -591,6 +579,6 @@ func prepareDefaultResponseMeta(response *http.Response) ResponseMetadata {
 func assertDefaultResponseMeta(t *testing.T, result, expected ResponseMetadata) {
 	t.Helper()
 
-	assert.Equal(t, result.StatusCode, expected.StatusCode)
-	assert.Equal(t, result.Header, expected.Header)
+	assert.Equal(t, expected.StatusCode, result.StatusCode)
+	assert.Equal(t, expected.Header, result.Header)
 }

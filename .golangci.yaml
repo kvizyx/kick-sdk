@@ -93,3 +93,7 @@ issues:
     - path: _test\.go
       linters:
         - funlen
+    - path: _test\.go
+      linters:
+        - staticcheck
+      text: "SA1029"

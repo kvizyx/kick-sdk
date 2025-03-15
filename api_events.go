@@ -27,18 +27,18 @@ const (
 
 var ErrNoEventsIDs = errors.New("events IDs are not passed but required")
 
-type Events struct {
+type EventsResource struct {
 	client *Client
 }
 
-func (c *Client) Events() Events {
-	return Events{client: c}
+func (c *Client) Events() EventsResource {
+	return EventsResource{client: c}
 }
 
 // GetSubscriptions retrieves events subscriptions based on the authorization token.
 //
 // Reference: https://docs.kick.com/events/subscribe-to-events#events-subscriptions
-func (e Events) GetSubscriptions(ctx context.Context) (Response[[]EventSubscription], error) {
+func (e EventsResource) GetSubscriptions(ctx context.Context) (Response[[]EventSubscription], error) {
 	resource := e.client.NewResource(ResourceTypeAPI, "public/v1/events/subscriptions")
 
 	request := NewRequest[[]EventSubscription](
@@ -76,7 +76,10 @@ type (
 // Subscribe subscribes to real-time events.
 //
 // Reference: https://docs.kick.com/events/subscribe-to-events#events-subscriptions-1
-func (e Events) Subscribe(ctx context.Context, input SubscribeEventsInput) (Response[[]SubscribeEventsOutput], error) {
+func (e EventsResource) Subscribe(
+	ctx context.Context,
+	input SubscribeEventsInput,
+) (Response[[]SubscribeEventsOutput], error) {
 	resource := e.client.NewResource(ResourceTypeAPI, "public/v1/events/subscriptions")
 
 	request := NewRequest[[]SubscribeEventsOutput](
@@ -100,7 +103,10 @@ type UnsubscribeEventsInput struct {
 // Unsubscribe unsubscribes (removes subscriptions) from the events subscriptions.
 //
 // Reference: https://docs.kick.com/events/subscribe-to-events#events-subscriptions-2
-func (e Events) Unsubscribe(ctx context.Context, input UnsubscribeEventsInput) (Response[EmptyResponse], error) {
+func (e EventsResource) Unsubscribe(
+	ctx context.Context,
+	input UnsubscribeEventsInput,
+) (Response[EmptyResponse], error) {
 	resource := e.client.NewResource(ResourceTypeAPI, "public/v1/events/subscriptions")
 
 	if len(input.EventsIDs) == 0 {
