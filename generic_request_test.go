@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/glichtv/kick-sdk/internal/urloptional"
@@ -15,6 +17,79 @@ import (
 
 type mockTestOutput struct {
 	Value string `json:"value"`
+}
+
+func TestRequest_Execute(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Build request error", func(t *testing.T) {
+		request := Request[mockTestOutput]{
+			ctx: nil,
+		}
+
+		_, err := request.Execute()
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "build request")
+	})
+
+	t.Run("Successful request execution", func(t *testing.T) {
+		server := httptest.NewServer(
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("X-Test", "test")
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write([]byte(`{"data": {"value": "test"}}`))
+			}),
+		)
+		t.Cleanup(func() {
+			server.Close()
+		})
+
+		var (
+			client = NewClient(
+				WithHTTPClient(server.Client()),
+				WithBaseURLs(BaseURLs{
+					APIBaseURL: server.URL,
+				}),
+			)
+			request = Request[mockTestOutput]{
+				ctx:    context.Background(),
+				client: client,
+				options: RequestOptions{
+					Resource: client.NewResource(ResourceTypeAPI, ""),
+					Method:   http.MethodGet,
+				},
+			}
+		)
+
+		response, err := request.Execute()
+		assert.NoError(t, err)
+
+		assert.Equal(t, http.StatusOK, response.ResponseMetadata.StatusCode)
+		assert.Equal(t, "test", response.ResponseMetadata.Header.Get("X-Test"))
+		assert.Equal(t, "test", response.Data.Value)
+	})
+
+	t.Run("Unsuccessful request execution", func(t *testing.T) {
+		mockErr := errors.New("test")
+
+		httpClient := &mockHTTPClient{
+			do: func(request *http.Request) (*http.Response, error) {
+				return nil, mockErr
+			},
+		}
+
+		var (
+			client  = NewClient(WithHTTPClient(httpClient))
+			request = Request[mockTestOutput]{
+				ctx:    context.Background(),
+				client: client,
+			}
+		)
+
+		_, err := request.Execute()
+		assert.Error(t, err)
+		assert.Equal(t, mockErr, errors.Unwrap(err))
+	})
 }
 
 func TestRequest_Build(t *testing.T) {
@@ -31,11 +106,8 @@ func TestRequest_Build(t *testing.T) {
 			ctx:    context.Background(),
 			client: client,
 			options: RequestOptions{
-				Resource: Resource{
-					Type: ResourceTypeAPI,
-					Path: "/test",
-				},
-				Method: http.MethodGet,
+				Resource: client.NewResource(ResourceTypeAPI, "test"),
+				Method:   http.MethodGet,
 			},
 		}
 
@@ -56,10 +128,7 @@ func TestRequest_Build(t *testing.T) {
 			ctx:    context.Background(),
 			client: client,
 			options: RequestOptions{
-				Resource: Resource{
-					Type: ResourceTypeAPI,
-					Path: "/test",
-				},
+				Resource:  client.NewResource(ResourceTypeAPI, "test"),
 				Method:    http.MethodGet,
 				URLValues: urlValues,
 			},
