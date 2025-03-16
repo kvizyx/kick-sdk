@@ -12,10 +12,17 @@
 
 ---
 
+Kick SDK is a toolkit for Golang applications that provides a clean way to interact with Kick public APIs.
+
 ## Documentation
 
 - [Kick APIs](https://docs.kick.com/) - official documentation for Kick APIs
 - [Kick SDK](https://kick-sdk.pages.dev) - documentation specifically for Kick SDK
+ 
+## Contributing
+
+You are more than welcome to contribute! Where it's possible, please include unit tests for any code that is introduced
+by your contribution. It's also helpful if you can include usage examples in the documentation.
 
 ## License
 
