@@ -15,7 +15,7 @@
 ## Documentation
 
 - [Kick APIs](https://docs.kick.com/) - official documentation for Kick APIs
-- [Kick SDK](https://kick-sdk.pages.dev) — documentation specifically for Kick SDK
+- [Kick SDK](https://kick-sdk.pages.dev) - documentation specifically for Kick SDK
 
 ## License
 
