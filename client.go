@@ -54,6 +54,7 @@ func (c *Client) SetAccessTokens(tokens AccessTokens) {
 func (c *Client) WithAccessTokens(tokens AccessTokens) *Client {
 	client := &Client{
 		httpClient:  c.httpClient,
+		baseURLs:    c.baseURLs,
 		credentials: c.credentials,
 	}
 

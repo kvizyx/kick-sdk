@@ -56,4 +56,8 @@ func TestClient_WithAccessTokens(t *testing.T) {
 
 	assert.Equal(t, accessTokens, clientCopy.AccessTokens())
 	assert.Equal(t, AccessTokens{}, client.AccessTokens())
+
+	client.SetAccessTokens(accessTokens)
+
+	assert.Equal(t, client, clientCopy)
 }
