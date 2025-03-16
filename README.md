@@ -1,6 +1,5 @@
 <div align="center">
     <h1>Kick SDK</h1>
-    <h3>A powerful and easy-to-use SDK for Kick APIs</h3>
 </div>
 
 <p align="center">
