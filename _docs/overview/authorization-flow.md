@@ -102,6 +102,7 @@ func oauthKickHandler(w http.ResponseWriter, r *http.Request) {
 				kicksdk.ScopeUserRead,
 				kicksdk.ScopeChannelRead,
 				kicksdk.ScopeChannelWrite,
+				kicksdk.ScopeChatWrite,
 				kicksdk.ScopeStreamKeyRead,
 				kicksdk.ScopeEventsSubscribe,
 			},
