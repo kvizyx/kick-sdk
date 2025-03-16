@@ -341,9 +341,9 @@ func TestParseAPIResponse(t *testing.T) {
 	})
 
 	t.Run("Unsuccessful response", func(t *testing.T) {
-		apiResp := apiResponse[EmptyResponse]{
+		apiResp := apiResponse[string]{
 			Message: "Error",
-			Payload: EmptyResponse{},
+			Payload: "",
 		}
 
 		body, err := json.Marshal(apiResp)
