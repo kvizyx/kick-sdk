@@ -8,6 +8,6 @@ indent_style = tab
 indent_size = 4
 max_line_length = 120
 
-[*.{yaml,yml,json}]
+[*.{yaml,yml,json,mts,ts}]
 indent_style = space
 indent_size = 2

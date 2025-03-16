@@ -7,12 +7,16 @@
     &nbsp;
     <a href="https://github.com/glichtv/kick-sdk/actions?query=branch%3Amain"><img height="30" src="https://img.shields.io/github/check-runs/glichtv/kick-sdk/main?style=for-the-badge&logo=githubactions&logoColor=white"/></a>
 	&nbsp;
-	&nbsp;
 	<a href="#"><img height="30" src="https://img.shields.io/badge/made with Go-blue?style=for-the-badge&logo=go&logoColor=white&labelColor=gray"/></a>
 </p>
 
 ---
 
+## Documentation
+
+- [Kick APIs](https://docs.kick.com/) - official documentation for Kick APIs
+- [Kick SDK](https://kick-sdk.pages.dev) — documentation specifically for Kick SDK
+
 ## License
 
-This library is distributed under the [MIT](LICENSE) license.
+This library is distributed under the [MIT](LICENCE) license.
