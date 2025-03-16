@@ -131,7 +131,7 @@ func parseAPIResponse[Output any](response *http.Response, meta ResponseMetadata
 	meta.KickMessage = output.Message
 
 	return Response[Output]{
-		Data:             output.Data,
+		Payload:          output.Payload,
 		ResponseMetadata: meta,
 	}, nil
 }
@@ -161,7 +161,7 @@ func parseIDResponse[Output any](response *http.Response, meta ResponseMetadata)
 	}
 
 	return Response[Output]{
-		Data:             output,
+		Payload:          output,
 		ResponseMetadata: meta,
 	}, nil
 }

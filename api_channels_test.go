@@ -28,7 +28,7 @@ func TestChannelsResource_GetByBroadcasterIDs(t *testing.T) {
 				},
 			}
 			expectedResponse = apiResponse[[]Channel]{
-				Data:    expectedData,
+				Payload: expectedData,
 				Message: "OK",
 			}
 		)
@@ -49,7 +49,7 @@ func TestChannelsResource_GetByBroadcasterIDs(t *testing.T) {
 		)
 		assert.NoError(t, err)
 
-		assert.Equal(t, expectedData, response.Data)
+		assert.Equal(t, expectedData, response.Payload)
 		assert.Equal(t, expectedResponse.Message, response.ResponseMetadata.KickMessage)
 	})
 }

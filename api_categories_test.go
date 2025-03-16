@@ -22,7 +22,7 @@ func TestCategoriesResource_Search(t *testing.T) {
 				},
 			}
 			expectedResponse = apiResponse[[]Category]{
-				Data:    expectedData,
+				Payload: expectedData,
 				Message: "OK",
 			}
 		)
@@ -43,7 +43,7 @@ func TestCategoriesResource_Search(t *testing.T) {
 		)
 		assert.NoError(t, err)
 
-		assert.Equal(t, expectedData, response.Data)
+		assert.Equal(t, expectedData, response.Payload)
 		assert.Equal(t, expectedResponse.Message, response.ResponseMetadata.KickMessage)
 	})
 }
@@ -59,7 +59,7 @@ func TestCategoriesResource_GetByID(t *testing.T) {
 				Thumbnail: "thumbnail",
 			}
 			expectedResponse = apiResponse[Category]{
-				Data:    expectedData,
+				Payload: expectedData,
 				Message: "OK",
 			}
 		)
@@ -80,7 +80,7 @@ func TestCategoriesResource_GetByID(t *testing.T) {
 		)
 		assert.NoError(t, err)
 
-		assert.Equal(t, expectedData, response.Data)
+		assert.Equal(t, expectedData, response.Payload)
 		assert.Equal(t, expectedResponse.Message, response.ResponseMetadata.KickMessage)
 	})
 }

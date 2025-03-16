@@ -3,9 +3,9 @@ package kicksdk
 import "net/http"
 
 type (
-	apiResponse[Data any] struct {
-		Data    Data   `json:"data,omitempty"`
-		Message string `json:"message,omitempty"`
+	apiResponse[Payload any] struct {
+		Payload Payload `json:"data,omitempty"`
+		Message string  `json:"message,omitempty"`
 	}
 
 	authErrorResponse struct {
@@ -20,8 +20,8 @@ type EmptyResponse struct{}
 
 // Response is a response that will be returned to the user as a result of a call to any
 // Kick API endpoint.
-type Response[Data any] struct {
-	Data             Data
+type Response[Payload any] struct {
+	Payload          Payload
 	ResponseMetadata ResponseMetadata
 }
 
