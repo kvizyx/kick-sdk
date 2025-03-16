@@ -109,7 +109,7 @@ func parseAPIResponse[Output any](response *http.Response, meta ResponseMetadata
 	if response.StatusCode > http.StatusPermanentRedirect {
 		// We cannot use EmptyResponse here because there is no documentation for error responses, and they can
 		// be returned in the only God knows what format.
-		var output apiResponse[string]
+		var output apiResponse[any]
 
 		if err := json.NewDecoder(response.Body).Decode(&output); err != nil {
 			return Response[Output]{ResponseMetadata: meta}, fmt.Errorf("decode response body: %w", err)
