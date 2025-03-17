@@ -32,10 +32,10 @@ func (c *Client) Users() UsersResource {
 	return UsersResource{client: c}
 }
 
-// InspectToken retrieves information about the token that is passed in via the authorization header.
+// IntrospectToken retrieves information about the token that is passed in via the authorization header.
 //
 // Reference: https://docs.kick.com/apis/users#token-introspect
-func (u UsersResource) InspectToken(ctx context.Context) (Response[TokenInfo], error) {
+func (u UsersResource) IntrospectToken(ctx context.Context) (Response[TokenInfo], error) {
 	resource := u.client.NewResource(ResourceTypeAPI, "public/v1/token/introspect")
 
 	request := NewRequest[TokenInfo](
