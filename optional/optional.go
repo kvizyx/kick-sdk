@@ -2,6 +2,8 @@ package optional
 
 import "encoding/json"
 
+const nullValue = "null"
+
 type Optional[T any] struct {
 	value T
 	set   bool
@@ -40,13 +42,17 @@ func (o Optional[T]) IsSet() bool {
 
 func (o Optional[T]) MarshalJSON() ([]byte, error) {
 	if !o.set {
-		return []byte("null"), nil
+		return []byte(nullValue), nil
 	}
 
 	return json.Marshal(o.value)
 }
 
 func (o *Optional[T]) UnmarshalJSON(bytes []byte) error {
+	if string(bytes) == nullValue {
+		return nil
+	}
+
 	err := json.Unmarshal(bytes, &o.value)
 	if err != nil {
 		return err

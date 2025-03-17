@@ -13,7 +13,7 @@ type PublicKeyOutput struct {
 //
 // Reference: https://docs.kick.com/apis/public-key#public-key
 func (c *Client) PublicKey(ctx context.Context) (Response[PublicKeyOutput], error) {
-	resource := c.NewResource(ResourceTypeID, "public/v1/public-key")
+	resource := c.NewResource(ResourceTypeAPI, "public/v1/public-key")
 
 	request := NewRequest[PublicKeyOutput](
 		ctx,

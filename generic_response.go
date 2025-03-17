@@ -16,7 +16,7 @@ type (
 
 // EmptyResponse is a response that is used as a stub in case endpoint is not returning any
 // data in response Body.
-type EmptyResponse struct{}
+type EmptyResponse any
 
 // Response is a response that will be returned to the user as a result of a call to any
 // Kick API endpoint.

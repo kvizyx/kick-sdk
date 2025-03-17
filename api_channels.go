@@ -75,8 +75,8 @@ func (c ChannelsResource) GetByBroadcasterIDs(
 }
 
 type UpdateStreamInput struct {
-	CategoryID  optional.Optional[int]    `json:"category_id,omitempty"`
-	StreamTitle optional.Optional[string] `json:"stream_title,omitempty"`
+	CategoryID  optional.Optional[int]    `json:"category_id"`
+	StreamTitle optional.Optional[string] `json:"stream_title"`
 }
 
 // UpdateStream updates Stream metadata for a Channel based on the channel ID.

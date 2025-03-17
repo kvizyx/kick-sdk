@@ -133,7 +133,7 @@ func (o OAuthResource) RevokeToken(ctx context.Context, input RevokeTokenInput) 
 	request := NewRequest[EmptyResponse](ctx, o.client, RequestOptions{
 		Resource: resource,
 		Method:   http.MethodPost,
-		Body: urloptional.Values{
+		URLValues: urloptional.Values{
 			"token":           urloptional.Single(input.Token),
 			"token_hint_type": urloptional.SingleOptional(input.TokenHintType),
 		},

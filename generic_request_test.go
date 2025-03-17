@@ -220,7 +220,7 @@ func TestParseResponse(t *testing.T) {
 		parsedResponse, err := parseResponse[EmptyResponse](response, -1)
 		assert.NoError(t, err)
 
-		assert.Equal(t, EmptyResponse{}, parsedResponse.Payload)
+		assert.Equal(t, nil, parsedResponse.Payload)
 		assert.Equal(t, expectedMeta, parsedResponse.ResponseMetadata)
 	})
 
@@ -281,7 +281,7 @@ func TestParseResponse(t *testing.T) {
 		parsedResponse, err := parseResponse[EmptyResponse](response, -1)
 		assert.ErrorIs(t, err, ErrUnknownResourceType)
 
-		assert.Equal(t, EmptyResponse{}, parsedResponse.Payload)
+		assert.Equal(t, nil, parsedResponse.Payload)
 		assert.Equal(t, expectedMeta, parsedResponse.ResponseMetadata)
 	})
 }

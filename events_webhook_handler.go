@@ -170,21 +170,15 @@ func (weh *WebhookEventsHandler) handleEvent(ctx context.Context, header Webhook
 	return nil
 }
 
-func (weh *WebhookEventsHandler) OnChatMessage(
-	cb WebhookEventCallback[EventChatMessage],
-) {
+func (weh *WebhookEventsHandler) OnChatMessage(cb WebhookEventCallback[EventChatMessage]) {
 	weh.onChatMessage = cb
 }
 
-func (weh *WebhookEventsHandler) OnChannelFollow(
-	cb WebhookEventCallback[EventChannelFollow],
-) {
+func (weh *WebhookEventsHandler) OnChannelFollow(cb WebhookEventCallback[EventChannelFollow]) {
 	weh.onChannelFollow = cb
 }
 
-func (weh *WebhookEventsHandler) OnChannelSubscriptionGifts(
-	cb WebhookEventCallback[EventChannelSubscriptionGifts],
-) {
+func (weh *WebhookEventsHandler) OnChannelSubscriptionGifts(cb WebhookEventCallback[EventChannelSubscriptionGifts]) {
 	weh.onChannelSubscriptionGifts = cb
 }
 

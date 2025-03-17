@@ -184,7 +184,7 @@ func TestOptional_UnmarshalJSON(t *testing.T) {
 		assert.EqualValues(t, "test pointer", *strPtrValue)
 	}
 
-	assert.True(t, values.NullInt.IsSet())
+	assert.False(t, values.NullInt.IsSet())
 
 	nullInt, _ := values.NullInt.Value()
 	assert.Zero(t, nullInt)

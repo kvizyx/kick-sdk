@@ -38,6 +38,7 @@ export default defineConfig({
               {text: 'Chat', link: '/overview/api-chat'},
               {text: 'Public Key', link: '/overview/api-public-key'},
               {text: 'OAuth', link: '/overview/api-oauth'},
+              {text: 'Events', link: '/overview/api-events'},
             ],
           },
         ]
