@@ -5,7 +5,6 @@ Documentation for the categories API. Official documentation is [here](https://d
 ## Payloads
 Various categories API payloads (entities). 
 ```go
-// Category represents a Kick's category.
 type Category struct {
 	ID        int    `json:"id,omitempty"`
 	Name      string `json:"name,omitempty"`
@@ -51,7 +50,7 @@ func main() {
 
 ## Get Category
 
-Getting category with the ID ```1```
+Getting category with the ID ```1```.
 
 ```go
 package main
