@@ -33,12 +33,12 @@ type (
 		verify    bool
 		publicKey string
 
-		OnChatMessage                WebhookEventCallback[EventChatMessage]
-		OnChannelFollow              WebhookEventCallback[EventChannelFollow]
-		OnChannelSubscriptionRenewal WebhookEventCallback[EventChannelSubscriptionRenewal]
-		OnChannelSubscriptionGifts   WebhookEventCallback[EventChannelSubscriptionGifts]
-		OnChannelSubscriptionCreated WebhookEventCallback[EventChannelSubscriptionCreated]
-		OnLivestreamStatusUpdated    WebhookEventCallback[EventLivestreamStatusUpdated]
+		onChatMessage                WebhookEventCallback[EventChatMessage]
+		onChannelFollow              WebhookEventCallback[EventChannelFollow]
+		onChannelSubscriptionRenewal WebhookEventCallback[EventChannelSubscriptionRenewal]
+		onChannelSubscriptionGifts   WebhookEventCallback[EventChannelSubscriptionGifts]
+		onChannelSubscriptionCreated WebhookEventCallback[EventChannelSubscriptionCreated]
+		onLivestreamStatusUpdated    WebhookEventCallback[EventLivestreamStatusUpdated]
 	}
 )
 
@@ -110,8 +110,8 @@ func (weh *WebhookEventsHandler) handleEvent(ctx context.Context, header Webhook
 			return fmt.Errorf("unmarshal event body: %w", err)
 		}
 
-		if weh.OnChatMessage != nil {
-			go weh.OnChatMessage(header, event)
+		if weh.onChatMessage != nil {
+			go weh.onChatMessage(header, event)
 		}
 	case EventTypeChannelFollow:
 		var event EventChannelFollow
@@ -120,8 +120,8 @@ func (weh *WebhookEventsHandler) handleEvent(ctx context.Context, header Webhook
 			return fmt.Errorf("unmarshal event body: %w", err)
 		}
 
-		if weh.OnChannelFollow != nil {
-			go weh.OnChannelFollow(header, event)
+		if weh.onChannelFollow != nil {
+			go weh.onChannelFollow(header, event)
 		}
 	case EventTypeChannelSubRenewal:
 		var event EventChannelSubscriptionRenewal
@@ -130,8 +130,8 @@ func (weh *WebhookEventsHandler) handleEvent(ctx context.Context, header Webhook
 			return fmt.Errorf("unmarshal event body: %w", err)
 		}
 
-		if weh.OnChannelSubscriptionRenewal != nil {
-			go weh.OnChannelSubscriptionRenewal(header, event)
+		if weh.onChannelSubscriptionRenewal != nil {
+			go weh.onChannelSubscriptionRenewal(header, event)
 		}
 	case EventTypeChannelSubGifts:
 		var event EventChannelSubscriptionGifts
@@ -140,8 +140,8 @@ func (weh *WebhookEventsHandler) handleEvent(ctx context.Context, header Webhook
 			return fmt.Errorf("unmarshal event body: %w", err)
 		}
 
-		if weh.OnChannelSubscriptionGifts != nil {
-			go weh.OnChannelSubscriptionGifts(header, event)
+		if weh.onChannelSubscriptionGifts != nil {
+			go weh.onChannelSubscriptionGifts(header, event)
 		}
 	case EventTypeChannelSubCreated:
 		var event EventChannelSubscriptionCreated
@@ -150,8 +150,8 @@ func (weh *WebhookEventsHandler) handleEvent(ctx context.Context, header Webhook
 			return fmt.Errorf("unmarshal event body: %w", err)
 		}
 
-		if weh.OnChannelSubscriptionCreated != nil {
-			go weh.OnChannelSubscriptionCreated(header, event)
+		if weh.onChannelSubscriptionCreated != nil {
+			go weh.onChannelSubscriptionCreated(header, event)
 		}
 	case EventTypeLivestreamStatusUpdated:
 		var event EventLivestreamStatusUpdated
@@ -160,12 +160,48 @@ func (weh *WebhookEventsHandler) handleEvent(ctx context.Context, header Webhook
 			return fmt.Errorf("unmarshal event body: %w", err)
 		}
 
-		if weh.OnLivestreamStatusUpdated != nil {
-			go weh.OnLivestreamStatusUpdated(header, event)
+		if weh.onLivestreamStatusUpdated != nil {
+			go weh.onLivestreamStatusUpdated(header, event)
 		}
 	default:
 		return ErrUnexpectedEventType
 	}
 
 	return nil
+}
+
+func (weh *WebhookEventsHandler) OnChatMessage(
+	cb WebhookEventCallback[EventChatMessage],
+) {
+	weh.onChatMessage = cb
+}
+
+func (weh *WebhookEventsHandler) OnChannelFollow(
+	cb WebhookEventCallback[EventChannelFollow],
+) {
+	weh.onChannelFollow = cb
+}
+
+func (weh *WebhookEventsHandler) OnChannelSubscriptionGifts(
+	cb WebhookEventCallback[EventChannelSubscriptionGifts],
+) {
+	weh.onChannelSubscriptionGifts = cb
+}
+
+func (weh *WebhookEventsHandler) OnLivestreamStatusUpdated(
+	cb WebhookEventCallback[EventLivestreamStatusUpdated],
+) {
+	weh.onLivestreamStatusUpdated = cb
+}
+
+func (weh *WebhookEventsHandler) OnChannelSubscriptionRenewal(
+	cb WebhookEventCallback[EventChannelSubscriptionRenewal],
+) {
+	weh.onChannelSubscriptionRenewal = cb
+}
+
+func (weh *WebhookEventsHandler) OnChannelSubscriptionCreated(
+	cb WebhookEventCallback[EventChannelSubscriptionCreated],
+) {
+	weh.onChannelSubscriptionCreated = cb
 }
