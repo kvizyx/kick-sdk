@@ -1,5 +1,5 @@
 <div align="center">
-    <h1>Kick SDK</h1>
+    <h1>Kick Golang SDK</h1>
 </div>
 
 <p align="center">
@@ -13,6 +13,12 @@
 ---
 
 Kick SDK is a toolkit for Golang applications that provides a clean way to interact with Kick public APIs.
+
+## Installation
+
+```bash
+go get github.com/glichtv/kick-sdk
+```
 
 ## Documentation
 
