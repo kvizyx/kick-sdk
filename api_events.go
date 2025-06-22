@@ -60,10 +60,13 @@ type (
 		Type    string `json:"name"`
 		Version int    `json:"version"`
 	}
-
+	
 	SubscribeEventsInput struct {
-		Events []EventInput                               `json:"events"`
-		Method optional.Optional[EventSubscriptionMethod] `json:"method,omitempty"`
+		// BroadcasterUserID is the ID of the user for whom the event subscription is being created.
+		// This field is required to specify which channel's events to subscribe to.
+		BroadcasterUserID int                                        `json:"broadcaster_user_id"`
+		Events            []EventInput                               `json:"events"`
+		Method            optional.Optional[EventSubscriptionMethod] `json:"method,omitempty"`
 	}
 
 	SubscribeEventsOutput struct {
