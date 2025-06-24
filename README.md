@@ -14,7 +14,7 @@
 
 > [!WARNING]
 > Unfortunately, it seems like Kick developers don't care about accepting new Go SDKs, as it's been aready 4 months since I opened a PR to add this SDK to the official documentation, and not even
-> negative feedback hasn't been received yet. So for now this repository will not be maintained, at least not until Kick starts taking open source projects more seriously, so I recommend you use [alternatives](https://github.com/Scorfly/gokick), which is more likely to be maintained.
+> negative feedback hasn't been received yet. So for now this repository will not be getting new updates (however, I am more than happy to review your PRs), at least not until Kick starts taking open source projects more seriously, so I recommend you use [alternatives](https://github.com/Scorfly/gokick), which is more likely to be maintained.
 
 Kick SDK is a toolkit for Golang applications that provides a clean way to interact with Kick public APIs.
 
